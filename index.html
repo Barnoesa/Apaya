@@ -1,924 +1,562 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Monitoring BMN KPU</title>
+<title>Dashboard Monitoring Aset TIK BMN KPU</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
 
-  :root {
-    --bg: #0b0f1a;
-    --surface: #131929;
-    --surface2: #1a2235;
-    --border: #1e2d45;
-    --accent: #3b82f6;
-    --accent2: #06b6d4;
-    --danger: #ef4444;
-    --warning: #f59e0b;
-    --success: #10b981;
-    --text: #e2e8f0;
-    --muted: #64748b;
-    --hilang: #ef4444;
-    --ada: #10b981;
-  }
+[data-theme="dark"] {
+  --bg:#0b0f1a; --surface:#131929; --surface2:#1a2235; --border:#1e2d45;
+  --text:#e2e8f0; --muted:#64748b; --shadow:rgba(0,0,0,0.4);
+  --input-bg:#0b0f1a; --login-card:#131929;
+  --grid:#0b0f1a; --tick:#64748b; --gridline:rgba(30,45,69,0.5);
+  --header:linear-gradient(135deg,#0b0f1a,#131929,#0d1525);
+}
+[data-theme="light"] {
+  --bg:#f0f4ff; --surface:#ffffff; --surface2:#f1f5f9; --border:#cbd5e1;
+  --text:#1e293b; --muted:#94a3b8; --shadow:rgba(0,0,0,0.08);
+  --input-bg:#f8fafc; --login-card:#ffffff;
+  --grid:#f8fafc; --tick:#94a3b8; --gridline:rgba(203,213,225,0.7);
+  --header:linear-gradient(135deg,#1e40af,#1d4ed8,#2563eb);
+}
+:root{--accent:#3b82f6;--accent2:#06b6d4;--danger:#ef4444;--warning:#f59e0b;--success:#10b981;}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;transition:background .3s,color .3s;}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    min-height: 100vh;
-  }
+/* LOGIN */
+#loginScreen{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;transition:background .3s;}
+.login-card{background:var(--login-card);border:1px solid var(--border);border-radius:20px;padding:44px 40px;width:100%;max-width:400px;box-shadow:0 20px 60px var(--shadow);animation:su .5s cubic-bezier(.16,1,.3,1);}
+@keyframes su{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.login-logo{width:56px;height:56px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 20px;box-shadow:0 8px 24px rgba(59,130,246,.3);}
+.login-title{text-align:center;font-size:20px;font-weight:800;color:var(--text);margin-bottom:4px;}
+.login-sub{text-align:center;font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:28px;}
+.login-label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:6px;}
+.login-input{width:100%;padding:11px 14px;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;font-size:14px;color:var(--text);font-family:inherit;outline:none;margin-bottom:16px;transition:border-color .2s,box-shadow .2s;}
+.login-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.12);}
+.login-btn{width:100%;padding:12px;background:linear-gradient(135deg,var(--accent),#2563eb);border:none;border-radius:10px;font-size:14px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;transition:opacity .2s,transform .1s;box-shadow:0 4px 14px rgba(59,130,246,.35);}
+.login-btn:hover{opacity:.92;transform:translateY(-1px);}
+.login-error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:10px 14px;font-size:12px;color:#ef4444;margin-top:12px;display:none;text-align:center;}
+.login-theme{position:absolute;top:20px;right:20px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 12px;cursor:pointer;font-size:14px;transition:all .2s;}
+.login-theme:hover{border-color:var(--accent);}
 
-  /* HEADER */
-  header {
-    background: linear-gradient(135deg, #0b0f1a 0%, #131929 50%, #0d1525 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 24px 32px;
-    position: relative;
-    overflow: hidden;
-  }
-  header::before {
-    content: '';
-    position: absolute;
-    top: -60px; right: -60px;
-    width: 200px; height: 200px;
-    background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%);
-    border-radius: 50%;
-  }
-  .header-inner {
-    max-width: 1400px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  .logo {
-    width: 44px; height: 44px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
-    flex-shrink: 0;
-  }
-  .header-text h1 {
-    font-size: 18px;
-    font-weight: 700;
-    color: #fff;
-    letter-spacing: -0.3px;
-  }
-  .header-text p {
-    font-size: 12px;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    margin-top: 2px;
-  }
-  .header-badge {
-    margin-left: auto;
-    background: rgba(59,130,246,0.1);
-    border: 1px solid rgba(59,130,246,0.3);
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 11px;
-    color: var(--accent2);
-    font-family: 'DM Mono', monospace;
-  }
+/* DASHBOARD */
+#dashboard{display:none;}
+header{background:var(--header);border-bottom:1px solid var(--border);padding:20px 32px;position:relative;overflow:hidden;}
+.header-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;gap:14px;}
+.hlogo{width:42px;height:42px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:1px solid rgba(255,255,255,.2);}
+.htext h1{font-size:17px;font-weight:700;color:#fff;}
+.htext p{font-size:11px;color:rgba(255,255,255,.6);font-family:'DM Mono',monospace;margin-top:2px;}
+.hright{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.hbadge{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:5px 11px;font-size:11px;color:rgba(255,255,255,.85);font-family:'DM Mono',monospace;}
+.theme-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:6px 13px;cursor:pointer;font-size:13px;color:#fff;font-family:inherit;font-weight:600;transition:all .2s;}
+.theme-btn:hover{background:rgba(255,255,255,.22);}
+.logout-btn{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px;color:#fca5a5;font-family:inherit;font-weight:600;transition:all .2s;}
+.logout-btn:hover{background:rgba(239,68,68,.25);}
 
-  /* MAIN */
-  main {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 28px 32px;
-  }
+main{max-width:1400px;margin:0 auto;padding:24px 32px;}
+.filter-bar{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap;align-items:center;}
+.filter-label{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+.filter-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 15px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .2s;font-family:inherit;font-weight:500;}
+.filter-btn:hover{border-color:var(--accent);color:var(--accent);}
+.filter-btn.active{background:rgba(59,130,246,.12);border-color:var(--accent);color:var(--accent);font-weight:700;}
+.search-box{margin-left:auto;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-size:13px;color:var(--text);font-family:inherit;width:220px;outline:none;transition:border-color .2s;}
+.search-box:focus{border-color:var(--accent);}
+.search-box::placeholder{color:var(--muted);}
 
-  /* FILTER BAR */
-  .filter-bar {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 28px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-  .filter-label {
-    font-size: 12px;
-    color: var(--muted);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .filter-btn {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 7px 16px;
-    font-size: 13px;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all 0.2s;
-    font-family: inherit;
-    font-weight: 500;
-  }
-  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .filter-btn.active {
-    background: rgba(59,130,246,0.15);
-    border-color: var(--accent);
-    color: #fff;
-  }
-  .search-box {
-    margin-left: auto;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 7px 14px;
-    font-size: 13px;
-    color: var(--text);
-    font-family: inherit;
-    width: 220px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .search-box:focus { border-color: var(--accent); }
-  .search-box::placeholder { color: var(--muted); }
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--shadow);}
+.kpi-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.kpi-card.total::after{background:linear-gradient(90deg,var(--accent),var(--accent2));}
+.kpi-card.hilang::after{background:#ef4444;}
+.kpi-card.ada::after{background:#10b981;}
+.kpi-card.kategori::after{background:var(--warning);}
+.kpi-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.kpi-value{font-size:34px;font-weight:800;line-height:1;margin-bottom:5px;font-family:'DM Mono',monospace;}
+.kpi-card.total .kpi-value{color:var(--accent);}
+.kpi-card.hilang .kpi-value{color:#ef4444;}
+.kpi-card.ada .kpi-value{color:#10b981;}
+.kpi-card.kategori .kpi-value{color:var(--warning);}
+.kpi-sub{font-size:12px;color:var(--muted);}
 
-  /* KPI CARDS */
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 24px;
-  }
-  .kpi-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.2s, border-color 0.2s;
-  }
-  .kpi-card:hover { transform: translateY(-2px); border-color: #2a3f5f; }
-  .kpi-card::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-  }
-  .kpi-card.total::after { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
-  .kpi-card.hilang::after { background: var(--hilang); }
-  .kpi-card.ada::after { background: var(--ada); }
-  .kpi-card.kategori::after { background: var(--warning); }
-  .kpi-label {
-    font-size: 11px;
-    color: var(--muted);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 10px;
-  }
-  .kpi-value {
-    font-size: 36px;
-    font-weight: 800;
-    line-height: 1;
-    margin-bottom: 6px;
-    font-family: 'DM Mono', monospace;
-  }
-  .kpi-card.total .kpi-value { color: var(--accent); }
-  .kpi-card.hilang .kpi-value { color: var(--hilang); }
-  .kpi-card.ada .kpi-value { color: var(--ada); }
-  .kpi-card.kategori .kpi-value { color: var(--warning); }
-  .kpi-sub {
-    font-size: 12px;
-    color: var(--muted);
-  }
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.chart-grid-3{display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-bottom:14px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;transition:background .3s,border-color .3s;}
+.card-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px;display:flex;align-items:center;gap:8px;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--accent);}
+.card-sub{font-size:11px;color:var(--muted);margin-bottom:14px;}
+.chart-wrap{position:relative;height:220px;}
+.chart-wrap.tall{height:280px;}
 
-  /* CHART GRID */
-  .chart-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 16px;
-  }
-  .chart-grid-3 {
-    display: grid;
-    grid-template-columns: 1.5fr 1fr;
-    gap: 16px;
-    margin-bottom: 16px;
-  }
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-  }
-  .card-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 4px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .card-title .dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-  }
-  .card-sub {
-    font-size: 11px;
-    color: var(--muted);
-    margin-bottom: 16px;
-  }
-  .chart-wrap {
-    position: relative;
-    height: 220px;
-  }
-  .chart-wrap.tall { height: 280px; }
-
-  /* TABLE */
-  .table-wrap {
-    overflow-x: auto;
-    margin-top: 8px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12.5px;
-  }
-  thead th {
-    background: var(--surface2);
-    padding: 10px 14px;
-    text-align: left;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--muted);
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-  }
-  tbody tr {
-    border-bottom: 1px solid rgba(30,45,69,0.6);
-    transition: background 0.15s;
-  }
-  tbody tr:hover { background: var(--surface2); }
-  tbody td {
-    padding: 9px 14px;
-    color: var(--text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 200px;
-  }
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-  }
-  .badge.hilang {
-    background: rgba(239,68,68,0.12);
-    color: var(--hilang);
-    border: 1px solid rgba(239,68,68,0.2);
-  }
-  .badge.ada {
-    background: rgba(16,185,129,0.12);
-    color: var(--ada);
-    border: 1px solid rgba(16,185,129,0.2);
-  }
-  .badge::before { content: '●'; font-size: 8px; }
-
-  /* PAGINATION */
-  .table-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 0 4px;
-    font-size: 12px;
-    color: var(--muted);
-  }
-  .page-btns { display: flex; gap: 6px; }
-  .page-btn {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 4px 12px;
-    font-size: 12px;
-    color: var(--text);
-    cursor: pointer;
-    transition: all 0.2s;
-    font-family: inherit;
-  }
-  .page-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  /* LEGEND */
-  .legend {
-    display: flex;
-    gap: 16px;
-    margin-top: 10px;
-    flex-wrap: wrap;
-  }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: var(--muted);
-  }
-  .legend-dot {
-    width: 10px; height: 10px;
-    border-radius: 3px;
-  }
-
-  @media (max-width: 900px) {
-    .kpi-grid { grid-template-columns: repeat(2,1fr); }
-    .chart-grid, .chart-grid-3 { grid-template-columns: 1fr; }
-    main { padding: 16px; }
-  }
+.table-wrap{overflow-x:auto;margin-top:8px;border-radius:8px;border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+thead th{background:var(--surface2);padding:10px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
+tbody tr:hover{background:var(--surface2);}
+tbody td{padding:9px 14px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+.badge.hilang{background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.2);}
+.badge.ada{background:rgba(16,185,129,.1);color:#10b981;border:1px solid rgba(16,185,129,.2);}
+.badge::before{content:'●';font-size:8px;}
+.table-footer{display:flex;align-items:center;justify-content:space-between;padding:12px 0 4px;font-size:12px;color:var(--muted);}
+.page-btns{display:flex;gap:6px;}
+.page-btn{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-size:12px;color:var(--text);cursor:pointer;transition:all .2s;font-family:inherit;}
+.page-btn:hover{border-color:var(--accent);color:var(--accent);}
+.page-btn:disabled{opacity:.4;cursor:not-allowed;}
+.legend{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);}
+.legend-dot{width:10px;height:10px;border-radius:3px;}
+@media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr);}.chart-grid,.chart-grid-3{grid-template-columns:1fr;}main{padding:16px;}header{padding:16px;}}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="header-inner">
-    <div class="logo">📋</div>
-    <div class="header-text">
-      <h1>Dashboard Monitoring BMN KPU HST</h1>
-      <p>BMN KPU — Barang Rusak &amp; Hilang</p>
-    </div>
-    <div class="header-badge">Data: Juni 2026</div>
+<div id="loginScreen">
+  <button class="login-theme" onclick="toggleTheme()">🌓</button>
+  <div class="login-card">
+    <div class="login-logo">📋</div>
+    <div class="login-title">Dashboard Aset TIK KPU</div>
+    <div class="login-sub">BMN KPU — Monitoring Barang Rusak &amp; Hilang</div>
+    <label class="login-label">Username</label>
+    <input class="login-input" id="lu" type="text" placeholder="Masukkan username" onkeydown="if(event.key==='Enter')doLogin()">
+    <label class="login-label">Password</label>
+    <input class="login-input" id="lp" type="password" placeholder="Masukkan password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">🔐 &nbsp;Masuk</button>
+    <div class="login-error" id="loginErr">Username atau password salah. Silakan coba lagi.</div>
   </div>
-</header>
+</div>
 
-<main>
-
-  <!-- FILTER BAR -->
-  <div class="filter-bar">
-    <span class="filter-label">Filter Status:</span>
-    <button class="filter-btn active" onclick="setFilter('all', this)">Semua</button>
-    <button class="filter-btn" onclick="setFilter('Hilang', this)">Hilang</button>
-    <button class="filter-btn" onclick="setFilter('Ada', this)">Ada</button>
-    <input type="text" class="search-box" id="searchBox" placeholder="🔍  Cari nama barang..." oninput="renderTable()">
-  </div>
-
-  <!-- KPI CARDS -->
-  <div class="kpi-grid">
-    <div class="kpi-card total">
-      <div class="kpi-label">Total Aset</div>
-      <div class="kpi-value" id="kpi-total">0</div>
-      <div class="kpi-sub">seluruh data barang</div>
-    </div>
-    <div class="kpi-card hilang">
-      <div class="kpi-label">Barang Hilang</div>
-      <div class="kpi-value" id="kpi-hilang">0</div>
-      <div class="kpi-sub" id="kpi-hilang-pct">—</div>
-    </div>
-    <div class="kpi-card ada">
-      <div class="kpi-label">Barang Ada</div>
-      <div class="kpi-value" id="kpi-ada">0</div>
-      <div class="kpi-sub" id="kpi-ada-pct">—</div>
-    </div>
-    <div class="kpi-card kategori">
-      <div class="kpi-label">Kategori Barang</div>
-      <div class="kpi-value" id="kpi-kat">0</div>
-      <div class="kpi-sub">jenis aset berbeda</div>
-    </div>
-  </div>
-
-  <!-- CHART ROW 1 -->
-  <div class="chart-grid">
-    <div class="card">
-      <div class="card-title"><span class="dot"></span>Status Barang per Kategori (Top 12)</div>
-      <div class="card-sub">Perbandingan Ada vs Hilang per jenis barang</div>
-      <div class="chart-wrap tall"><canvas id="barChart"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="card-title"><span class="dot" style="background:var(--accent2)"></span>Distribusi Status Keseluruhan</div>
-      <div class="card-sub">Proporsi barang Ada dan Hilang</div>
-      <div class="chart-wrap" style="height:200px;display:flex;align-items:center;justify-content:center;">
-        <canvas id="donutChart"></canvas>
+<div id="dashboard">
+  <header>
+    <div class="header-inner">
+      <div class="hlogo">📋</div>
+      <div class="htext">
+        <h1>Dashboard Monitoring Aset Peralatan TIK</h1>
+        <p>BMN KPU — Barang Rusak &amp; Hilang</p>
       </div>
-      <div class="legend" id="donut-legend"></div>
+      <div class="hright">
+        <div class="hbadge">Data: Juni 2026</div>
+        <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+        <button class="logout-btn" onclick="doLogout()">⏏ Keluar</button>
+      </div>
     </div>
-  </div>
-
-  <!-- CHART ROW 2 -->
-  <div class="chart-grid-3">
+  </header>
+  <main>
+    <div class="filter-bar">
+      <span class="filter-label">Filter Status:</span>
+      <button class="filter-btn active" onclick="setFilter('all',this)">Semua</button>
+      <button class="filter-btn" onclick="setFilter('Hilang',this)">Hilang</button>
+      <button class="filter-btn" onclick="setFilter('Ada',this)">Ada</button>
+      <input type="text" class="search-box" id="searchBox" placeholder="🔍  Cari nama barang..." oninput="renderTable()">
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card total"><div class="kpi-label">Total Aset</div><div class="kpi-value" id="kpi-total">0</div><div class="kpi-sub">seluruh data barang</div></div>
+      <div class="kpi-card hilang"><div class="kpi-label">Barang Hilang</div><div class="kpi-value" id="kpi-hilang">0</div><div class="kpi-sub" id="kpi-hp">—</div></div>
+      <div class="kpi-card ada"><div class="kpi-label">Barang Ada</div><div class="kpi-value" id="kpi-ada">0</div><div class="kpi-sub" id="kpi-ap">—</div></div>
+      <div class="kpi-card kategori"><div class="kpi-label">Kategori Barang</div><div class="kpi-value" id="kpi-kat">0</div><div class="kpi-sub">jenis aset berbeda</div></div>
+    </div>
+    <div class="chart-grid">
+      <div class="card">
+        <div class="card-title"><span class="dot"></span>Status Barang per Kategori (Top 12)</div>
+        <div class="card-sub">Perbandingan Ada vs Hilang per jenis barang</div>
+        <div class="chart-wrap tall"><canvas id="barChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:var(--accent2)"></span>Distribusi Status Keseluruhan</div>
+        <div class="card-sub">Proporsi barang Ada dan Hilang</div>
+        <div class="chart-wrap" style="height:200px;display:flex;align-items:center;justify-content:center;"><canvas id="donutChart"></canvas></div>
+        <div class="legend" id="donut-legend"></div>
+      </div>
+    </div>
+    <div class="chart-grid-3">
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:var(--warning)"></span>Jumlah Aset per Tahun Perolehan</div>
+        <div class="card-sub">Distribusi aset berdasarkan tahun pengadaan</div>
+        <div class="chart-wrap"><canvas id="lineChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:var(--danger)"></span>Top 8 Barang Hilang Terbanyak</div>
+        <div class="card-sub">Kategori dengan kehilangan tertinggi</div>
+        <div class="chart-wrap"><canvas id="hbarChart"></canvas></div>
+      </div>
+    </div>
     <div class="card">
-      <div class="card-title"><span class="dot" style="background:var(--warning)"></span>Jumlah Aset per Tahun Perolehan</div>
-      <div class="card-sub">Distribusi aset berdasarkan tahun pengadaan</div>
-      <div class="chart-wrap"><canvas id="lineChart"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="card-title"><span class="dot" style="background:var(--danger)"></span>Top 8 Barang Hilang Terbanyak</div>
-      <div class="card-sub">Kategori dengan kehilangan tertinggi</div>
-      <div class="chart-wrap"><canvas id="hbarChart"></canvas></div>
-    </div>
-  </div>
-
-  <!-- TABLE -->
-  <div class="card">
-    <div class="card-title"><span class="dot" style="background:var(--success)"></span>Detail Data Aset</div>
-    <div class="card-sub">Klik kolom untuk sorting — menampilkan semua rekaman</div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
+      <div class="card-title"><span class="dot" style="background:var(--success)"></span>Detail Data Aset</div>
+      <div class="card-sub">Klik kolom untuk sorting</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
             <th>#</th>
             <th onclick="sortTable('nup')" style="cursor:pointer">NUP ↕</th>
             <th onclick="sortTable('nama')" style="cursor:pointer">Nama Barang ↕</th>
             <th onclick="sortTable('aset')" style="cursor:pointer">Nama Aset ↕</th>
             <th onclick="sortTable('tanggal')" style="cursor:pointer">Tgl Perolehan ↕</th>
             <th onclick="sortTable('umur')" style="cursor:pointer">Umur Aset ↕</th>
-            <th onclick="sortTable('kondisi')" style="cursor:pointer">Kondisi ↕</th>
+            <th>Kondisi</th>
             <th onclick="sortTable('status')" style="cursor:pointer">Status ↕</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-      </table>
-    </div>
-    <div class="table-footer">
-      <span id="tableInfo">Menampilkan — data</span>
-      <div class="page-btns">
-        <button class="page-btn" id="btnPrev" onclick="changePage(-1)">‹ Prev</button>
-        <span id="pageInfo" style="padding:4px 8px;font-size:12px;color:var(--muted)"></span>
-        <button class="page-btn" id="btnNext" onclick="changePage(1)">Next ›</button>
+          </tr></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <div class="table-footer">
+        <span id="tableInfo">—</span>
+        <div class="page-btns">
+          <button class="page-btn" id="btnPrev" onclick="changePage(-1)">‹ Prev</button>
+          <span id="pageInfo" style="padding:4px 8px;font-size:12px;color:var(--muted)"></span>
+          <button class="page-btn" id="btnNext" onclick="changePage(1)">Next ›</button>
+        </div>
       </div>
     </div>
-  </div>
-
-</main>
+  </main>
+</div>
 
 <script>
-// ===== RAW DATA =====
-const rawData = [
-  {nup:5,nama:"Sepeda Motor",aset:"SUZUKI THUNDER 125",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:1,nama:"Scanner (Universal Tester)",aset:"FUJITSU",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 tahun 11 bulan",status:"Ada"},
-  {nup:1,nama:"Mesin Hitung Elektronik/Calculator",aset:"Citizen",kondisi:"Rusak Berat",tanggal:"29/7/2008",umur:"17 tahun 10 bulan",status:"Hilang"},
-  {nup:2,nama:"Mesin Hitung Elektronik/Calculator",aset:"Citizen",kondisi:"Rusak Berat",tanggal:"29/7/2008",umur:"17 tahun 10 bulan",status:"Hilang"},
-  {nup:3,nama:"Mesin Hitung Elektronik/Calculator",aset:"Citizen",kondisi:"Rusak Berat",tanggal:"29/7/2008",umur:"17 tahun 10 bulan",status:"Hilang"},
-  {nup:4,nama:"Mesin Hitung Elektronik/Calculator",aset:"Citizen",kondisi:"Rusak Berat",tanggal:"29/7/2008",umur:"17 tahun 10 bulan",status:"Hilang"},
-  {nup:5,nama:"Mesin Hitung Elektronik/Calculator",aset:"Citizen",kondisi:"Rusak Berat",tanggal:"29/7/2008",umur:"17 tahun 10 bulan",status:"Hilang"},
-  {nup:6,nama:"Mesin Hitung Elektronik/Calculator",aset:"Citizen",kondisi:"Rusak Berat",tanggal:"29/7/2008",umur:"17 tahun 10 bulan",status:"Hilang"},
-  {nup:7,nama:"Mesin Hitung Elektronik/Calculator",aset:"Karce",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 tahun 5 bulan",status:"Hilang"},
-  {nup:8,nama:"Mesin Hitung Elektronik/Calculator",aset:"Citizen",kondisi:"Rusak Berat",tanggal:"30/6/2008",umur:"17 tahun 11 bulan",status:"Hilang"},
-  {nup:9,nama:"Mesin Hitung Elektronik/Calculator",aset:"Citizen",kondisi:"Rusak Berat",tanggal:"30/6/2008",umur:"17 tahun 11 bulan",status:"Hilang"},
-  {nup:10,nama:"Mesin Hitung Elektronik/Calculator",aset:"Citizen",kondisi:"Rusak Berat",tanggal:"30/6/2008",umur:"17 tahun 11 bulan",status:"Hilang"},
-  {nup:11,nama:"Mesin Hitung Elektronik/Calculator",aset:"Citizen",kondisi:"Rusak Berat",tanggal:"30/6/2008",umur:"17 tahun 11 bulan",status:"Hilang"},
-  {nup:12,nama:"Mesin Hitung Elektronik/Calculator",aset:"Citizen",kondisi:"Rusak Berat",tanggal:"30/6/2008",umur:"17 tahun 11 bulan",status:"Hilang"},
-  {nup:13,nama:"Mesin Hitung Elektronik/Calculator",aset:"Citizen",kondisi:"Rusak Berat",tanggal:"30/6/2008",umur:"17 tahun 11 bulan",status:"Hilang"},
-  {nup:1,nama:"Lemari Besi/Metal",aset:"50x40x130, Plat Besi",kondisi:"Rusak Berat",tanggal:"16/12/2019",umur:"6 tahun 5 bulan",status:"Ada"},
-  {nup:2,nama:"Lemari Besi/Metal",aset:"50x40x130, Plat Besi",kondisi:"Rusak Berat",tanggal:"16/12/2019",umur:"6 tahun 5 bulan",status:"Ada"},
-  {nup:3,nama:"Lemari Besi/Metal",aset:"50x40x130, Plat Besi",kondisi:"Rusak Berat",tanggal:"16/12/2019",umur:"6 tahun 5 bulan",status:"Ada"},
-  {nup:4,nama:"Lemari Besi/Metal",aset:"50x40x130, Plat Besi",kondisi:"Rusak Berat",tanggal:"16/12/2019",umur:"6 tahun 5 bulan",status:"Hilang"},
-  {nup:1,nama:"Lemari Kayu",aset:"Kayu Lokal",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 tahun 5 bulan",status:"Ada"},
-  {nup:1,nama:"Filing Cabinet Besi",aset:"Brother B-103",kondisi:"Rusak Berat",tanggal:"12/4/2012",umur:"13 tahun 6 bulan",status:"Ada"},
-  {nup:3,nama:"Filing Cabinet Besi",aset:"Brother B-103",kondisi:"Rusak Berat",tanggal:"12/4/2012",umur:"13 tahun 6 bulan",status:"Ada"},
-  {nup:4,nama:"Filing Cabinet Besi",aset:"Brother B-103",kondisi:"Rusak Berat",tanggal:"4/12/2012",umur:"13 tahun 6 bulan",status:"Ada"},
-  {nup:1,nama:"Brandkas",aset:"National 215",kondisi:"Rusak Berat",tanggal:"29/7/2008",umur:"17 tahun 10 bulan",status:"Hilang"},
-  {nup:2,nama:"Brandkas",aset:"National",kondisi:"Rusak Berat",tanggal:"30/6/2008",umur:"17 tahun 11 bulan",status:"Ada"},
-  {nup:3,nama:"Brandkas",aset:"Krisbow",kondisi:"Rusak Berat",tanggal:"30/12/2019",umur:"6 tahun 5 bulan",status:"Ada"},
-  {nup:51,nama:"CCTV",aset:"HI LOOK",kondisi:"Rusak Berat",tanggal:"1/11/2021",umur:"4 tahun 7 bulan",status:"Hilang"},
-  {nup:1,nama:"Mesin Absensi",aset:"BIO FINGER AT 300",kondisi:"Rusak Berat",tanggal:"27/12/2016",umur:"9 tahun 5 bulan",status:"Ada"},
-  {nup:1,nama:"LCD Projector/Infocus",aset:"Toshiba TDP S35",kondisi:"Rusak Berat",tanggal:"14/08/2007",umur:"18 tahun 9 bulan",status:"Hilang"},
-  {nup:2,nama:"LCD Projector/Infocus",aset:"Epson EH-TW570",kondisi:"Rusak Berat",tanggal:"04/12/2017",umur:"8 tahun 6 bulan",status:"Ada"},
-  {nup:3,nama:"LCD Projector/Infocus",aset:"INFOCUS 3000 Lumens",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 tahun 5 bulan",status:"Hilang"},
-  {nup:1,nama:"Meja Kerja Besi/Metal",aset:"ACTIV MT 121",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:2,nama:"Meja Kerja Besi/Metal",aset:"ACTIV MT 121",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:3,nama:"Meja Kerja Besi/Metal",aset:"ACTIV MT 121",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:4,nama:"Meja Kerja Besi/Metal",aset:"ACTIV MT 121",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:5,nama:"Meja Kerja Besi/Metal",aset:"ACTIV MT 121",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:6,nama:"Meja Kerja Besi/Metal",aset:"ACTIV MT 121",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:7,nama:"Meja Kerja Besi/Metal",aset:"ACTIV MT 121",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:8,nama:"Meja Kerja Besi/Metal",aset:"ACTIV MT 121",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:1,nama:"Meja Kerja Kayu",aset:"PRO DESIGN",kondisi:"Rusak Berat",tanggal:"23/4/2011",umur:"15 tahun 1 bulan",status:"Hilang"},
-  {nup:2,nama:"Meja Kerja Kayu",aset:"PRO DESIGN",kondisi:"Rusak Berat",tanggal:"23/4/2011",umur:"15 tahun 1 bulan",status:"Hilang"},
-  {nup:3,nama:"Meja Kerja Kayu",aset:"PRO DESIGN",kondisi:"Rusak Berat",tanggal:"4/23/2011",umur:"15 tahun 1 bulan",status:"Hilang"},
-  {nup:4,nama:"Meja Kerja Kayu",aset:"PRO DESIGN",kondisi:"Rusak Berat",tanggal:"4/23/2011",umur:"15 tahun 1 bulan",status:"Hilang"},
-  {nup:5,nama:"Meja Kerja Kayu",aset:"PRO DESIGN",kondisi:"Rusak Berat",tanggal:"4/23/2011",umur:"15 tahun 1 bulan",status:"Hilang"},
-  {nup:6,nama:"Meja Kerja Kayu",aset:"PRO DESIGN",kondisi:"Rusak Berat",tanggal:"04/12/2012",umur:"13 tahun 6 bulan",status:"Hilang"},
-  {nup:7,nama:"Meja Kerja Kayu",aset:"PRO DESIGN",kondisi:"Rusak Berat",tanggal:"04/12/2012",umur:"13 tahun 6 bulan",status:"Hilang"},
-  {nup:8,nama:"Meja Kerja Kayu",aset:"PRO DESIGN",kondisi:"Rusak Berat",tanggal:"04/12/2012",umur:"13 tahun 6 bulan",status:"Hilang"},
-  {nup:9,nama:"Meja Kerja Kayu",aset:"PRO DESIGN",kondisi:"Rusak Berat",tanggal:"04/12/2012",umur:"13 tahun 6 bulan",status:"Hilang"},
-  {nup:10,nama:"Meja Kerja Kayu",aset:"PRO DESIGN",kondisi:"Rusak Berat",tanggal:"4/12/2012",umur:"13 tahun 6 bulan",status:"Hilang"},
-  {nup:11,nama:"Meja Kerja Kayu",aset:"ACTIV GALANT MTO 120",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 tahun 5 bulan",status:"Hilang"},
-  {nup:12,nama:"Meja Kerja Kayu",aset:"Dimensi 160x60x75",kondisi:"Rusak Berat",tanggal:"16/12/2019",umur:"6 tahun 5 bulan",status:"Hilang"},
-  {nup:13,nama:"Meja Kerja Kayu",aset:"Dimensi 160x60x75",kondisi:"Rusak Berat",tanggal:"16/12/2019",umur:"6 tahun 5 bulan",status:"Hilang"},
-  {nup:14,nama:"Meja Kerja Kayu",aset:"Dimensi 160x60x75",kondisi:"Rusak Berat",tanggal:"16/12/2019",umur:"6 tahun 5 bulan",status:"Hilang"},
-  {nup:15,nama:"Meja Kerja Kayu",aset:"Dimensi 160x60x75",kondisi:"Rusak Berat",tanggal:"16/12/2019",umur:"6 tahun 5 bulan",status:"Hilang"},
-  {nup:16,nama:"Meja Kerja Kayu",aset:"Dimensi 160x60x75",kondisi:"Rusak Berat",tanggal:"16/12/2019",umur:"6 tahun 5 bulan",status:"Hilang"},
-  {nup:17,nama:"Meja Kerja Kayu",aset:"Dimensi 160x60x75",kondisi:"Rusak Berat",tanggal:"16/12/2019",umur:"6 tahun 5 bulan",status:"Hilang"},
-  {nup:18,nama:"Meja Kerja Kayu",aset:"-",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 tahun 5 bulan",status:"Ada"},
-  {nup:19,nama:"Meja Kerja Kayu",aset:"-",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 tahun 5 bulan",status:"Ada"},
-  {nup:20,nama:"Meja Kerja Kayu",aset:"-",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 tahun 5 bulan",status:"Ada"},
-  {nup:21,nama:"Meja Kerja Kayu",aset:"-",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 tahun 5 bulan",status:"Hilang"},
-  {nup:1,nama:"Kursi Besi/Metal",aset:"INDHACI D-234",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Ada"},
-  {nup:4,nama:"Kursi Besi/Metal",aset:"INDHACI D-234",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Ada"},
-  {nup:5,nama:"Kursi Besi/Metal",aset:"INDHACI D-234",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Ada"},
-  {nup:6,nama:"Kursi Besi/Metal",aset:"INDHACI D-234",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Ada"},
-  {nup:7,nama:"Kursi Besi/Metal",aset:"INDHACI D-234",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Ada"},
-  {nup:1,nama:"Kursi Kayu",aset:"Olympic 3-1-1",kondisi:"Rusak Berat",tanggal:"29/07/2008",umur:"17 tahun 10 bulan",status:"Ada"},
-  {nup:2,nama:"Kursi Kayu",aset:"Kayu Lokal",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 tahun 5 bulan",status:"Ada"},
-  {nup:3,nama:"Kursi Kayu",aset:"Kayu Lokal",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 tahun 5 bulan",status:"Ada"},
-  {nup:4,nama:"Kursi Kayu",aset:"Olympic",kondisi:"Rusak Berat",tanggal:"30/06/2008",umur:"17 tahun 11 bulan",status:"Hilang"},
-  {nup:1,nama:"Meja Rapat",aset:"-",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 tahun 5 bulan",status:"Ada"},
-  {nup:2,nama:"Meja Rapat",aset:"-",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 tahun 5 bulan",status:"Hilang"},
-  {nup:3,nama:"Meja Rapat",aset:"-",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 tahun 5 bulan",status:"Hilang"},
-  {nup:4,nama:"Meja Rapat",aset:"-",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 tahun 5 bulan",status:"Hilang"},
-  {nup:5,nama:"Meja Rapat",aset:"-",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 tahun 5 bulan",status:"Hilang"},
-  {nup:6,nama:"Meja Rapat",aset:"-",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 tahun 5 bulan",status:"Hilang"},
-  {nup:7,nama:"Meja Rapat",aset:"-",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 tahun 5 bulan",status:"Hilang"},
-  {nup:8,nama:"Meja Rapat",aset:"-",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 tahun 5 bulan",status:"Hilang"},
-  {nup:1,nama:"Meja Komputer",aset:"Grace 150",kondisi:"Rusak Berat",tanggal:"14/08/2007",umur:"18 tahun 9 bulan",status:"Hilang"},
-  {nup:2,nama:"Meja Komputer",aset:"Kayu Lokal",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 tahun 5 bulan",status:"Hilang"},
-  {nup:3,nama:"Meja Komputer",aset:"Kayu Lokal",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 tahun 5 bulan",status:"Hilang"},
-  {nup:4,nama:"Meja Komputer",aset:"ACTIV/WOSS CT",kondisi:"Rusak Berat",tanggal:"31/10/2013",umur:"12 tahun 7 bulan",status:"Hilang"},
-  {nup:5,nama:"Meja Komputer",aset:"ACTIV/WOSS CT",kondisi:"Rusak Berat",tanggal:"31/10/2013",umur:"12 tahun 7 bulan",status:"Hilang"},
-  {nup:1,nama:"Jam Elektronik",aset:"Quartz Time Star",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 tahun 5 bulan",status:"Hilang"},
-  {nup:2,nama:"Jam Elektronik",aset:"Quartz Time Star",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 tahun 5 bulan",status:"Hilang"},
-  {nup:1,nama:"Televisi",aset:"36\" LED CHANGHONG",kondisi:"Rusak Berat",tanggal:"12/04/2018",umur:"8 tahun 1 bulan",status:"Hilang"},
-  {nup:1,nama:"Tape Recorder",aset:"SONY M-470",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:1,nama:"Loudspeaker",aset:"Empire 28000",kondisi:"Rusak Berat",tanggal:"29/07/2008",umur:"17 tahun 10 bulan",status:"Ada"},
-  {nup:1,nama:"Sound System",aset:"dat",kondisi:"Rusak Berat",tanggal:"12/04/2018",umur:"8 tahun 1 bulan",status:"Ada"},
-  {nup:1,nama:"Wireless",aset:"Sanken",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 tahun 5 bulan",status:"Hilang"},
-  {nup:2,nama:"Wireless",aset:"Sanken",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 tahun 5 bulan",status:"Hilang"},
-  {nup:3,nama:"Wireless",aset:"LINKSYS E2500AP",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 tahun 5 bulan",status:"Ada"},
-  {nup:4,nama:"Wireless",aset:"LINKSYS E2500AP",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 tahun 5 bulan",status:"Hilang"},
-  {nup:1,nama:"Megaphone",aset:"TLA ZR-2015S",kondisi:"Rusak Berat",tanggal:"29/07/2008",umur:"17 tahun 10 bulan",status:"Ada"},
-  {nup:2,nama:"Megaphone",aset:"T O A",kondisi:"Rusak Berat",tanggal:"30/06/2008",umur:"17 tahun 11 bulan",status:"Hilang"},
-  {nup:1,nama:"Tangga Aluminium",aset:"Lipat",kondisi:"Rusak Berat",tanggal:"29/07/2008",umur:"17 tahun 10 bulan",status:"Hilang"},
-  {nup:2,nama:"Tangga Aluminium",aset:"Lipat",kondisi:"Rusak Berat",tanggal:"30/06/2008",umur:"17 tahun 11 bulan",status:"Hilang"},
-  {nup:1,nama:"Handy Cam",aset:"SONY DCR-DVD 810E",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Ada"},
-  {nup:2,nama:"Handy Cam",aset:"SONY CX220E",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 tahun 5 bulan",status:"Ada"},
-  {nup:3,nama:"Handy Cam",aset:"SONY Handycam HDR-PJ410",kondisi:"Rusak Berat",tanggal:"04/12/2017",umur:"8 tahun 6 bulan",status:"Hilang"},
-  {nup:1,nama:"Speaker Kabaret",aset:"SIMBADA Z-100",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:2,nama:"Speaker Kabaret",aset:"SIMBADA Z-100",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:3,nama:"Speaker Kabaret",aset:"SIMBADA Z-100",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:4,nama:"Speaker Kabaret",aset:"SIMBADA Z-100",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:5,nama:"Speaker Kabaret",aset:"SIMBADA Z-100",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:6,nama:"Speaker Kabaret",aset:"SIMBADA Z-100",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:7,nama:"Speaker Kabaret",aset:"SIMBADA Z-100",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:8,nama:"Speaker Kabaret",aset:"SIMBADA Z-100",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:1,nama:"UPS",aset:"-",kondisi:"Rusak Berat",tanggal:"31/12/2004",umur:"21 tahun 5 bulan",status:"Ada"},
-  {nup:2,nama:"UPS",aset:"-",kondisi:"Rusak Berat",tanggal:"31/12/2004",umur:"21 tahun 5 bulan",status:"Ada"},
-  {nup:3,nama:"UPS",aset:"-",kondisi:"Rusak Berat",tanggal:"31/12/2004",umur:"21 tahun 5 bulan",status:"Ada"},
-  {nup:1,nama:"Digital Audio Taperecorder",aset:"SONY ICD-UX523F",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 tahun 5 bulan",status:"Hilang"},
-  {nup:1,nama:"Camera Film",aset:"NIKON D-60",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Ada"},
-  {nup:1,nama:"Layar Film/Projector",aset:"Focus",kondisi:"Rusak Berat",tanggal:"29/07/2008",umur:"17 tahun 10 bulan",status:"Hilang"},
-  {nup:1,nama:"Camera Digital",aset:"Olympus FE-280",kondisi:"Rusak Berat",tanggal:"29/04/2008",umur:"18 tahun 1 bulan",status:"Ada"},
-  {nup:2,nama:"Camera Digital",aset:"Olympus",kondisi:"Rusak Berat",tanggal:"31/12/2008",umur:"17 tahun 5 bulan",status:"Hilang"},
-  {nup:3,nama:"Camera Digital",aset:"Olympus FE 280",kondisi:"Rusak Berat",tanggal:"10/04/2008",umur:"18 tahun 1 bulan",status:"Hilang"},
-  {nup:4,nama:"Camera Digital",aset:"OLYMPUS FE-300",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Ada"},
-  {nup:5,nama:"Camera Digital",aset:"BENQ GH600",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 tahun 5 bulan",status:"Ada"},
-  {nup:6,nama:"Camera Digital",aset:"Canon EOS 1300D",kondisi:"Rusak Berat",tanggal:"01/11/2017",umur:"8 tahun 7 bulan",status:"Hilang"},
-  {nup:1,nama:"Pesawat Telephone",aset:"Panaphone",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 tahun 5 bulan",status:"Ada"},
-  {nup:1,nama:"Telex",aset:"PANASONIC KX-FL 402 CX",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Ada"},
-  {nup:1,nama:"Scanner Facsimile",aset:"HP SCANJET 8300",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Ada"},
-  {nup:2,nama:"Scanner Facsimile",aset:"CANON/FAX/L170",kondisi:"Rusak Berat",tanggal:"31/10/2013",umur:"12 tahun 7 bulan",status:"Ada"},
-  // Clinical Thermometer (182 items - all Hilang)
-  ...Array.from({length:182},(_,i)=>({nup:i+1,nama:"Clinical Thermometer",aset:"-",kondisi:"Rusak Berat",tanggal:"01/07/2020",umur:"5 tahun 11 bulan",status:"Hilang"})),
-  // UPS (ICA)
-  ...Array.from({length:6},(_,i)=>({nup:i+1,nama:"UPS (ICA CE-600)",aset:"ICA CE-600",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Ada"})),
-  ...Array.from({length:4},(_,i)=>({nup:i+7,nama:"UPS (ICA CE-600)",aset:"ICA CE-600",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Hilang"})),
-  {nup:1,nama:"Komputer Jaringan",aset:"LINKSYS WRT54G",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  // PC Unit
-  {nup:1,nama:"PC Unit",aset:"Pentium Dual Core",kondisi:"Rusak Berat",tanggal:"14/08/2007",umur:"18 tahun 9 bulan",status:"Hilang"},
-  {nup:2,nama:"PC Unit",aset:"Intel Core 2 Duo",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:4,nama:"PC Unit",aset:"Intel Core 2 Duo",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:5,nama:"PC Unit",aset:"Intel Core 2 Duo",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:6,nama:"PC Unit",aset:"Intel Core 2 Duo",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:7,nama:"PC Unit",aset:"Intel Core 2 Duo",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:8,nama:"PC Unit",aset:"Intel Core 2 Duo",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:9,nama:"PC Unit",aset:"Intel Core 2 Duo",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:10,nama:"PC Unit",aset:"HP",kondisi:"Rusak Berat",tanggal:"31/12/2004",umur:"21 tahun 5 bulan",status:"Hilang"},
-  {nup:11,nama:"PC Unit",aset:"HP",kondisi:"Rusak Berat",tanggal:"31/12/2004",umur:"21 tahun 5 bulan",status:"Hilang"},
-  {nup:12,nama:"PC Unit",aset:"HP",kondisi:"Rusak Berat",tanggal:"31/12/2004",umur:"21 tahun 5 bulan",status:"Hilang"},
-  {nup:13,nama:"PC Unit",aset:"ACER Aspire M3985",kondisi:"Rusak Berat",tanggal:"04/12/2012",umur:"13 tahun 6 bulan",status:"Hilang"},
-  {nup:14,nama:"PC Unit",aset:"Lenovo IdeaCenter H520",kondisi:"Rusak Berat",tanggal:"31/10/2013",umur:"12 tahun 7 bulan",status:"Ada"},
-  {nup:15,nama:"PC Unit",aset:"Lenovo IdeaCenter H520",kondisi:"Rusak Berat",tanggal:"31/10/2013",umur:"12 tahun 7 bulan",status:"Ada"},
-  {nup:16,nama:"PC Unit",aset:"Lenovo IdeaCenter H520",kondisi:"Rusak Berat",tanggal:"31/10/2013",umur:"12 tahun 7 bulan",status:"Hilang"},
-  {nup:17,nama:"PC Unit",aset:"Lenovo IdeaCenter H520",kondisi:"Rusak Berat",tanggal:"31/10/2013",umur:"12 tahun 7 bulan",status:"Hilang"},
-  {nup:18,nama:"PC Unit",aset:"Lenovo IdeaCenter H520",kondisi:"Rusak Berat",tanggal:"31/10/2013",umur:"12 tahun 7 bulan",status:"Hilang"},
-  {nup:19,nama:"PC Unit",aset:"ACER AMC605",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 tahun 5 bulan",status:"Ada"},
-  {nup:20,nama:"PC Unit",aset:"ACER AMC605",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 tahun 5 bulan",status:"Ada"},
-  {nup:21,nama:"PC Unit",aset:"PC AIO HP AMD",kondisi:"Rusak Berat",tanggal:"30/11/2017",umur:"8 tahun 6 bulan",status:"Hilang"},
-  {nup:22,nama:"PC Unit",aset:"Dell OptiPlex 5050",kondisi:"Rusak Berat",tanggal:"04/12/2017",umur:"8 tahun 6 bulan",status:"Ada"},
-  {nup:23,nama:"PC Unit",aset:"Dell OptiPlex 5050",kondisi:"Rusak Berat",tanggal:"04/12/2017",umur:"8 tahun 6 bulan",status:"Hilang"},
-  {nup:24,nama:"PC Unit",aset:"Dell OptiPlex 5050",kondisi:"Rusak Berat",tanggal:"03/07/2018",umur:"7 tahun 11 bulan",status:"Hilang"},
-  {nup:25,nama:"PC Unit",aset:"Lenovo AIO 520",kondisi:"Rusak Berat",tanggal:"11/12/2018",umur:"7 tahun 5 bulan",status:"Ada"},
-  {nup:26,nama:"PC Unit",aset:"Lenovo AIO 520",kondisi:"Rusak Berat",tanggal:"11/12/2018",umur:"7 tahun 5 bulan",status:"Ada"},
-  {nup:27,nama:"PC Unit",aset:"Lenovo AIO 520",kondisi:"Rusak Berat",tanggal:"11/12/2018",umur:"7 tahun 5 bulan",status:"Hilang"},
-  // Laptop
-  {nup:1,nama:"Laptop",aset:"Toshiba A135",kondisi:"Rusak Berat",tanggal:"14/08/2007",umur:"18 tahun 9 bulan",status:"Ada"},
-  {nup:2,nama:"Laptop",aset:"Toshiba U 205",kondisi:"Rusak Berat",tanggal:"29/04/2008",umur:"18 tahun 1 bulan",status:"Hilang"},
-  {nup:3,nama:"Laptop",aset:"Acer 4710z",kondisi:"Rusak Berat",tanggal:"29/04/2008",umur:"18 tahun 1 bulan",status:"Hilang"},
-  {nup:4,nama:"Laptop",aset:"Axioo",kondisi:"Rusak Berat",tanggal:"31/12/2007",umur:"18 tahun 5 bulan",status:"Hilang"},
-  {nup:6,nama:"Laptop",aset:"Toshiba U 205",kondisi:"Rusak Berat",tanggal:"10/04/2008",umur:"18 tahun 1 bulan",status:"Ada"},
-  {nup:7,nama:"Laptop",aset:"Acer 4710z",kondisi:"Rusak Berat",tanggal:"10/04/2008",umur:"18 tahun 1 bulan",status:"Ada"},
-  {nup:8,nama:"Laptop",aset:"ACER",kondisi:"Rusak Berat",tanggal:"23/04/2011",umur:"15 tahun 1 bulan",status:"Ada"},
-  {nup:9,nama:"Laptop",aset:"ASUS",kondisi:"Rusak Berat",tanggal:"27/12/2016",umur:"9 tahun 5 bulan",status:"Hilang"},
-  {nup:10,nama:"Laptop",aset:"Dell Inspiron 14 7447",kondisi:"Rusak Berat",tanggal:"04/12/2017",umur:"8 tahun 6 bulan",status:"Ada"},
-  {nup:11,nama:"Laptop",aset:"Dell Inspiron 14 7447",kondisi:"Rusak Berat",tanggal:"04/12/2017",umur:"8 tahun 6 bulan",status:"Hilang"},
-  {nup:12,nama:"Laptop",aset:"Dell Inspiron 14 7447",kondisi:"Rusak Berat",tanggal:"04/12/2017",umur:"8 tahun 6 bulan",status:"Hilang"},
-  {nup:13,nama:"Laptop",aset:"Asus FX504GD",kondisi:"Rusak Berat",tanggal:"11/12/2018",umur:"7 tahun 5 bulan",status:"Hilang"},
-  {nup:15,nama:"Laptop",aset:"ASUS X555QA",kondisi:"Rusak Berat",tanggal:"18/12/2018",umur:"7 tahun 5 bulan",status:"Ada"},
-  {nup:16,nama:"Laptop",aset:"DELL INSPIRON 15 3576",kondisi:"Rusak Berat",tanggal:"10/12/2018",umur:"7 tahun 5 bulan",status:"Hilang"},
-  {nup:17,nama:"Laptop",aset:"Asus Core i5",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 tahun 5 bulan",status:"Hilang"},
-  {nup:18,nama:"Laptop",aset:"Asus Core i5",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 tahun 5 bulan",status:"Hilang"},
-  {nup:20,nama:"Laptop",aset:"Asus Core i5",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 tahun 5 bulan",status:"Ada"},
-  // Note Book
-  {nup:1,nama:"Note Book",aset:"TOSHIBA SATELIT M-300",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Ada"},
-  {nup:2,nama:"Note Book",aset:"TOSHIBA SATELIT M-300",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Ada"},
-  {nup:3,nama:"Note Book",aset:"TOSHIBA/SATELLITE/L840",kondisi:"Rusak Berat",tanggal:"31/10/2013",umur:"12 tahun 7 bulan",status:"Ada"},
-  {nup:4,nama:"Note Book",aset:"ASUS X450CA",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 tahun 5 bulan",status:"Ada"},
-  {nup:5,nama:"Note Book",aset:"ASUS X450CA",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 tahun 5 bulan",status:"Ada"},
-  {nup:6,nama:"Note Book",aset:"Vostro 14 5468",kondisi:"Rusak Berat",tanggal:"20/11/2017",umur:"8 tahun 6 bulan",status:"Hilang"},
-  // CPU
-  {nup:1,nama:"CPU",aset:"HP Compaq",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 tahun 5 bulan",status:"Hilang"},
-  {nup:2,nama:"CPU",aset:"LG",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 tahun 5 bulan",status:"Hilang"},
-  {nup:3,nama:"CPU",aset:"HP Compaq",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 tahun 5 bulan",status:"Hilang"},
-  {nup:4,nama:"CPU",aset:"HP Compaq",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 tahun 5 bulan",status:"Hilang"},
-  // Monitor
-  {nup:1,nama:"Monitor",aset:"HP 5500",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 tahun 5 bulan",status:"Hilang"},
-  {nup:2,nama:"Monitor",aset:"LG",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 tahun 5 bulan",status:"Ada"},
-  {nup:3,nama:"Monitor",aset:"HP 5500",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 tahun 5 bulan",status:"Ada"},
-  {nup:4,nama:"Monitor",aset:"HP 5500",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 tahun 5 bulan",status:"Hilang"},
-  // Printer
-  {nup:1,nama:"Printer",aset:"Canon IP 700",kondisi:"Rusak Berat",tanggal:"14/08/2007",umur:"18 tahun 9 bulan",status:"Hilang"},
-  {nup:2,nama:"Printer",aset:"Canon IP 700",kondisi:"Rusak Berat",tanggal:"14/08/2007",umur:"18 tahun 9 bulan",status:"Hilang"},
-  {nup:3,nama:"Printer",aset:"Canon IP 188i",kondisi:"Rusak Berat",tanggal:"29/04/2008",umur:"18 tahun 1 bulan",status:"Ada"},
-  {nup:4,nama:"Printer",aset:"Canon IP 188i",kondisi:"Rusak Berat",tanggal:"29/04/2008",umur:"18 tahun 1 bulan",status:"Ada"},
-  {nup:5,nama:"Printer",aset:"Canon IP 188i",kondisi:"Rusak Berat",tanggal:"29/04/2008",umur:"18 tahun 1 bulan",status:"Ada"},
-  {nup:6,nama:"Printer",aset:"HP All In One F2180",kondisi:"Rusak Berat",tanggal:"29/04/2008",umur:"18 tahun 1 bulan",status:"Hilang"},
-  {nup:7,nama:"Printer",aset:"HP Laserjet 1020",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 tahun 5 bulan",status:"Hilang"},
-  {nup:8,nama:"Printer",aset:"Canon Pixma 1700",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 tahun 5 bulan",status:"Hilang"},
-  {nup:9,nama:"Printer",aset:"HP 5500",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 tahun 5 bulan",status:"Hilang"},
-  {nup:10,nama:"Printer",aset:"HP Laser Jet 3330",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 tahun 5 bulan",status:"Ada"},
-  {nup:11,nama:"Printer",aset:"Epson LQ 2180",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 tahun 5 bulan",status:"Ada"},
-  {nup:13,nama:"Printer",aset:"Canon Ip1881",kondisi:"Rusak Berat",tanggal:"10/04/2008",umur:"18 tahun 1 bulan",status:"Hilang"},
-  {nup:14,nama:"Printer",aset:"Canon Ip1881",kondisi:"Rusak Berat",tanggal:"10/04/2008",umur:"18 tahun 1 bulan",status:"Hilang"},
-  {nup:15,nama:"Printer",aset:"Canon Ip1881",kondisi:"Rusak Berat",tanggal:"10/04/2008",umur:"18 tahun 1 bulan",status:"Hilang"},
-  {nup:16,nama:"Printer",aset:"LaserJet HP F2180",kondisi:"Rusak Berat",tanggal:"10/04/2008",umur:"18 tahun 1 bulan",status:"Hilang"},
-  {nup:17,nama:"Printer",aset:"CANON IP 4500",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Ada"},
-  {nup:18,nama:"Printer",aset:"CANON IP 4500",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Ada"},
-  {nup:19,nama:"Printer",aset:"HP 3330",kondisi:"Rusak Berat",tanggal:"31/12/2004",umur:"21 tahun 5 bulan",status:"Hilang"},
-  {nup:20,nama:"Printer",aset:"EPSON LQ 2180",kondisi:"Rusak Berat",tanggal:"31/12/2004",umur:"21 tahun 5 bulan",status:"Hilang"},
-  {nup:21,nama:"Printer",aset:"HP Laser Jet Pro M1132",kondisi:"Rusak Berat",tanggal:"04/12/2012",umur:"13 tahun 6 bulan",status:"Ada"},
-  {nup:22,nama:"Printer",aset:"CANON LBP7018C",kondisi:"Rusak Berat",tanggal:"31/10/2013",umur:"12 tahun 7 bulan",status:"Ada"},
-  {nup:23,nama:"Printer",aset:"CANON IP100",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 tahun 5 bulan",status:"Hilang"},
-  {nup:24,nama:"Printer",aset:"Canon PIXMA G2000",kondisi:"Rusak Berat",tanggal:"30/11/2017",umur:"8 tahun 6 bulan",status:"Hilang"},
-  {nup:25,nama:"Printer",aset:"Brother MFC",kondisi:"Rusak Berat",tanggal:"27/11/2018",umur:"7 tahun 6 bulan",status:"Ada"},
-  {nup:26,nama:"Printer",aset:"Brother MFC-L2700DW",kondisi:"Rusak Berat",tanggal:"11/12/2018",umur:"7 tahun 5 bulan",status:"Ada"},
-  {nup:28,nama:"Printer",aset:"EPSON Inkjet",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 tahun 5 bulan",status:"Ada"},
-  {nup:29,nama:"Printer",aset:"EPSON Inkjet",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 tahun 5 bulan",status:"Ada"},
-  {nup:31,nama:"Printer",aset:"EPSON Inkjet",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 tahun 5 bulan",status:"Hilang"},
-  {nup:33,nama:"Printer",aset:"EPSON Inkjet",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 tahun 5 bulan",status:"Hilang"},
-  {nup:34,nama:"Printer",aset:"EPSON Inkjet",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 tahun 5 bulan",status:"Hilang"},
-  {nup:35,nama:"Printer",aset:"EPSON Inkjet",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 tahun 5 bulan",status:"Hilang"},
-  // Scanner
-  {nup:1,nama:"Scanner",aset:"EPSON V6000",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 tahun 5 bulan",status:"Ada"},
-  {nup:3,nama:"Scanner",aset:"Canon DR-M160II",kondisi:"Rusak Berat",tanggal:"04/12/2017",umur:"8 tahun 6 bulan",status:"Ada"},
-  {nup:4,nama:"Scanner",aset:"i2820",kondisi:"Rusak Berat",tanggal:"11/12/2018",umur:"7 tahun 5 bulan",status:"Ada"},
-  {nup:6,nama:"Scanner",aset:"i2820",kondisi:"Rusak Berat",tanggal:"11/12/2018",umur:"7 tahun 5 bulan",status:"Ada"},
-  {nup:7,nama:"Scanner",aset:"i2820",kondisi:"Rusak Berat",tanggal:"11/12/2018",umur:"7 tahun 5 bulan",status:"Hilang"},
-  {nup:8,nama:"Scanner",aset:"BROTHER ADS 1100 W",kondisi:"Rusak Berat",tanggal:"18/12/2018",umur:"7 tahun 5 bulan",status:"Hilang"},
-  // External Hardisk
-  {nup:1,nama:"External Hardisk",aset:"WD MY Passport 2TB",kondisi:"Rusak Berat",tanggal:"30/11/2017",umur:"8 tahun 6 bulan",status:"Hilang"},
-  {nup:2,nama:"External Hardisk",aset:"SEAGATE 2TB",kondisi:"Rusak Berat",tanggal:"04/12/2017",umur:"8 tahun 6 bulan",status:"Hilang"},
-  // Hub
-  {nup:1,nama:"Hub",aset:"SMC 8 PORT",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Ada"},
-  {nup:2,nama:"Hub",aset:"SMC 8 PORT",kondisi:"Rusak Berat",tanggal:"23/06/2011",umur:"14 tahun 11 bulan",status:"Hilang"},
-  {nup:3,nama:"Hub",aset:"-",kondisi:"Rusak Berat",tanggal:"30/12/2004",umur:"21 tahun 5 bulan",status:"Hilang"},
-  {nup:4,nama:"Hub",aset:"TP LINK TL3424",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 tahun 5 bulan",status:"Hilang"},
-  {nup:1,nama:"Switch",aset:"TRENDNET 48-Port",kondisi:"Rusak Berat",tanggal:"04/12/2017",umur:"8 tahun 6 bulan",status:"Ada"},
+// AUTH
+function doLogin(){
+  const u=document.getElementById('lu').value.trim();
+  const p=document.getElementById('lp').value.trim();
+  const e=document.getElementById('loginErr');
+  if(u==='KPU'&&p==='HSTMURAKTA'){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('dashboard').style.display='block';
+    loggedIn=true; updateKPI(); renderTable(); updateCharts();
+  } else {
+    e.style.display='block';
+    document.getElementById('lp').value='';
+    setTimeout(()=>{e.style.display='none';},3500);
+  }
+}
+function doLogout(){
+  loggedIn=false;
+  document.getElementById('lu').value='';
+  document.getElementById('lp').value='';
+  document.getElementById('dashboard').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+}
+let loggedIn=false;
+
+// THEME
+let isDark=true;
+function toggleTheme(){
+  isDark=!isDark;
+  document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
+  const b=document.getElementById('themeBtn');
+  if(b) b.innerHTML=isDark?'🌙 Dark':'☀️ Light';
+  if(loggedIn) setTimeout(updateCharts,50);
+}
+
+// DATA
+const rawData=[
+  {nup:5,nama:"Sepeda Motor",aset:"SUZUKI THUNDER 125",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:1,nama:"Scanner (Universal Tester)",aset:"FUJITSU",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Ada"},
+  {nup:1,nama:"Mesin Hitung/Calculator",aset:"Citizen",kondisi:"Rusak Berat",tanggal:"29/7/2008",umur:"17 thn 10 bln",status:"Hilang"},
+  {nup:2,nama:"Mesin Hitung/Calculator",aset:"Citizen",kondisi:"Rusak Berat",tanggal:"29/7/2008",umur:"17 thn 10 bln",status:"Hilang"},
+  {nup:3,nama:"Mesin Hitung/Calculator",aset:"Citizen",kondisi:"Rusak Berat",tanggal:"29/7/2008",umur:"17 thn 10 bln",status:"Hilang"},
+  {nup:4,nama:"Mesin Hitung/Calculator",aset:"Citizen",kondisi:"Rusak Berat",tanggal:"29/7/2008",umur:"17 thn 10 bln",status:"Hilang"},
+  {nup:5,nama:"Mesin Hitung/Calculator",aset:"Citizen",kondisi:"Rusak Berat",tanggal:"29/7/2008",umur:"17 thn 10 bln",status:"Hilang"},
+  {nup:6,nama:"Mesin Hitung/Calculator",aset:"Citizen",kondisi:"Rusak Berat",tanggal:"29/7/2008",umur:"17 thn 10 bln",status:"Hilang"},
+  {nup:7,nama:"Mesin Hitung/Calculator",aset:"Karce",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 thn 5 bln",status:"Hilang"},
+  {nup:8,nama:"Mesin Hitung/Calculator",aset:"Citizen",kondisi:"Rusak Berat",tanggal:"30/6/2008",umur:"17 thn 11 bln",status:"Hilang"},
+  {nup:9,nama:"Mesin Hitung/Calculator",aset:"Citizen",kondisi:"Rusak Berat",tanggal:"30/6/2008",umur:"17 thn 11 bln",status:"Hilang"},
+  {nup:10,nama:"Mesin Hitung/Calculator",aset:"Citizen",kondisi:"Rusak Berat",tanggal:"30/6/2008",umur:"17 thn 11 bln",status:"Hilang"},
+  {nup:11,nama:"Mesin Hitung/Calculator",aset:"Citizen",kondisi:"Rusak Berat",tanggal:"30/6/2008",umur:"17 thn 11 bln",status:"Hilang"},
+  {nup:12,nama:"Mesin Hitung/Calculator",aset:"Citizen",kondisi:"Rusak Berat",tanggal:"30/6/2008",umur:"17 thn 11 bln",status:"Hilang"},
+  {nup:13,nama:"Mesin Hitung/Calculator",aset:"Citizen",kondisi:"Rusak Berat",tanggal:"30/6/2008",umur:"17 thn 11 bln",status:"Hilang"},
+  {nup:1,nama:"Lemari Besi/Metal",aset:"Plat Besi",kondisi:"Rusak Berat",tanggal:"16/12/2019",umur:"6 thn 5 bln",status:"Ada"},
+  {nup:2,nama:"Lemari Besi/Metal",aset:"Plat Besi",kondisi:"Rusak Berat",tanggal:"16/12/2019",umur:"6 thn 5 bln",status:"Ada"},
+  {nup:3,nama:"Lemari Besi/Metal",aset:"Plat Besi",kondisi:"Rusak Berat",tanggal:"16/12/2019",umur:"6 thn 5 bln",status:"Ada"},
+  {nup:4,nama:"Lemari Besi/Metal",aset:"Plat Besi",kondisi:"Rusak Berat",tanggal:"16/12/2019",umur:"6 thn 5 bln",status:"Hilang"},
+  {nup:1,nama:"Lemari Kayu",aset:"Kayu Lokal",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 thn 5 bln",status:"Ada"},
+  {nup:1,nama:"Filing Cabinet Besi",aset:"Brother B-103",kondisi:"Rusak Berat",tanggal:"12/4/2012",umur:"13 thn 6 bln",status:"Ada"},
+  {nup:3,nama:"Filing Cabinet Besi",aset:"Brother B-103",kondisi:"Rusak Berat",tanggal:"12/4/2012",umur:"13 thn 6 bln",status:"Ada"},
+  {nup:4,nama:"Filing Cabinet Besi",aset:"Brother B-103",kondisi:"Rusak Berat",tanggal:"4/12/2012",umur:"13 thn 6 bln",status:"Ada"},
+  {nup:1,nama:"Brandkas",aset:"National 215",kondisi:"Rusak Berat",tanggal:"29/7/2008",umur:"17 thn 10 bln",status:"Hilang"},
+  {nup:2,nama:"Brandkas",aset:"National",kondisi:"Rusak Berat",tanggal:"30/6/2008",umur:"17 thn 11 bln",status:"Ada"},
+  {nup:3,nama:"Brandkas",aset:"Krisbow",kondisi:"Rusak Berat",tanggal:"30/12/2019",umur:"6 thn 5 bln",status:"Ada"},
+  {nup:51,nama:"CCTV",aset:"HI LOOK",kondisi:"Rusak Berat",tanggal:"1/11/2021",umur:"4 thn 7 bln",status:"Hilang"},
+  {nup:1,nama:"Mesin Absensi",aset:"BIO FINGER AT 300",kondisi:"Rusak Berat",tanggal:"27/12/2016",umur:"9 thn 5 bln",status:"Ada"},
+  {nup:1,nama:"LCD Projector/Infocus",aset:"Toshiba TDP S35",kondisi:"Rusak Berat",tanggal:"14/8/2007",umur:"18 thn 9 bln",status:"Hilang"},
+  {nup:2,nama:"LCD Projector/Infocus",aset:"Epson EH-TW570",kondisi:"Rusak Berat",tanggal:"4/12/2017",umur:"8 thn 6 bln",status:"Ada"},
+  {nup:3,nama:"LCD Projector/Infocus",aset:"INFOCUS 3000 Lumens",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 thn 5 bln",status:"Hilang"},
+  {nup:1,nama:"Meja Kerja Besi/Metal",aset:"ACTIV MT 121",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:2,nama:"Meja Kerja Besi/Metal",aset:"ACTIV MT 121",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:3,nama:"Meja Kerja Besi/Metal",aset:"ACTIV MT 121",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:4,nama:"Meja Kerja Besi/Metal",aset:"ACTIV MT 121",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:5,nama:"Meja Kerja Besi/Metal",aset:"ACTIV MT 121",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:6,nama:"Meja Kerja Besi/Metal",aset:"ACTIV MT 121",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:7,nama:"Meja Kerja Besi/Metal",aset:"ACTIV MT 121",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:8,nama:"Meja Kerja Besi/Metal",aset:"ACTIV MT 121",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:1,nama:"Meja Kerja Kayu",aset:"PRO DESIGN",kondisi:"Rusak Berat",tanggal:"23/4/2011",umur:"15 thn 1 bln",status:"Hilang"},
+  {nup:2,nama:"Meja Kerja Kayu",aset:"PRO DESIGN",kondisi:"Rusak Berat",tanggal:"23/4/2011",umur:"15 thn 1 bln",status:"Hilang"},
+  {nup:3,nama:"Meja Kerja Kayu",aset:"PRO DESIGN",kondisi:"Rusak Berat",tanggal:"23/4/2011",umur:"15 thn 1 bln",status:"Hilang"},
+  {nup:4,nama:"Meja Kerja Kayu",aset:"PRO DESIGN",kondisi:"Rusak Berat",tanggal:"23/4/2011",umur:"15 thn 1 bln",status:"Hilang"},
+  {nup:5,nama:"Meja Kerja Kayu",aset:"PRO DESIGN",kondisi:"Rusak Berat",tanggal:"23/4/2011",umur:"15 thn 1 bln",status:"Hilang"},
+  {nup:6,nama:"Meja Kerja Kayu",aset:"PRO DESIGN",kondisi:"Rusak Berat",tanggal:"4/12/2012",umur:"13 thn 6 bln",status:"Hilang"},
+  {nup:7,nama:"Meja Kerja Kayu",aset:"PRO DESIGN",kondisi:"Rusak Berat",tanggal:"4/12/2012",umur:"13 thn 6 bln",status:"Hilang"},
+  {nup:8,nama:"Meja Kerja Kayu",aset:"PRO DESIGN",kondisi:"Rusak Berat",tanggal:"4/12/2012",umur:"13 thn 6 bln",status:"Hilang"},
+  {nup:9,nama:"Meja Kerja Kayu",aset:"PRO DESIGN",kondisi:"Rusak Berat",tanggal:"4/12/2012",umur:"13 thn 6 bln",status:"Hilang"},
+  {nup:10,nama:"Meja Kerja Kayu",aset:"PRO DESIGN",kondisi:"Rusak Berat",tanggal:"4/12/2012",umur:"13 thn 6 bln",status:"Hilang"},
+  {nup:11,nama:"Meja Kerja Kayu",aset:"ACTIV GALANT MTO 120",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 thn 5 bln",status:"Hilang"},
+  {nup:12,nama:"Meja Kerja Kayu",aset:"Dimensi 160x60x75",kondisi:"Rusak Berat",tanggal:"16/12/2019",umur:"6 thn 5 bln",status:"Hilang"},
+  {nup:13,nama:"Meja Kerja Kayu",aset:"Dimensi 160x60x75",kondisi:"Rusak Berat",tanggal:"16/12/2019",umur:"6 thn 5 bln",status:"Hilang"},
+  {nup:14,nama:"Meja Kerja Kayu",aset:"Dimensi 160x60x75",kondisi:"Rusak Berat",tanggal:"16/12/2019",umur:"6 thn 5 bln",status:"Hilang"},
+  {nup:15,nama:"Meja Kerja Kayu",aset:"Dimensi 160x60x75",kondisi:"Rusak Berat",tanggal:"16/12/2019",umur:"6 thn 5 bln",status:"Hilang"},
+  {nup:16,nama:"Meja Kerja Kayu",aset:"Dimensi 160x60x75",kondisi:"Rusak Berat",tanggal:"16/12/2019",umur:"6 thn 5 bln",status:"Hilang"},
+  {nup:17,nama:"Meja Kerja Kayu",aset:"Dimensi 160x60x75",kondisi:"Rusak Berat",tanggal:"16/12/2019",umur:"6 thn 5 bln",status:"Hilang"},
+  {nup:18,nama:"Meja Kerja Kayu",aset:"-",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 thn 5 bln",status:"Ada"},
+  {nup:19,nama:"Meja Kerja Kayu",aset:"-",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 thn 5 bln",status:"Ada"},
+  {nup:20,nama:"Meja Kerja Kayu",aset:"-",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 thn 5 bln",status:"Ada"},
+  {nup:21,nama:"Meja Kerja Kayu",aset:"-",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 thn 5 bln",status:"Hilang"},
+  {nup:1,nama:"Kursi Besi/Metal",aset:"INDHACI D-234",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Ada"},
+  {nup:4,nama:"Kursi Besi/Metal",aset:"INDHACI D-234",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Ada"},
+  {nup:5,nama:"Kursi Besi/Metal",aset:"INDHACI D-234",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Ada"},
+  {nup:6,nama:"Kursi Besi/Metal",aset:"INDHACI D-234",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Ada"},
+  {nup:7,nama:"Kursi Besi/Metal",aset:"INDHACI D-234",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Ada"},
+  {nup:1,nama:"Kursi Kayu",aset:"Olympic 3-1-1",kondisi:"Rusak Berat",tanggal:"29/7/2008",umur:"17 thn 10 bln",status:"Ada"},
+  {nup:2,nama:"Kursi Kayu",aset:"Kayu Lokal",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 thn 5 bln",status:"Ada"},
+  {nup:3,nama:"Kursi Kayu",aset:"Kayu Lokal",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 thn 5 bln",status:"Ada"},
+  {nup:4,nama:"Kursi Kayu",aset:"Olympic",kondisi:"Rusak Berat",tanggal:"30/6/2008",umur:"17 thn 11 bln",status:"Hilang"},
+  {nup:1,nama:"Meja Rapat",aset:"-",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 thn 5 bln",status:"Ada"},
+  {nup:2,nama:"Meja Rapat",aset:"-",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 thn 5 bln",status:"Hilang"},
+  {nup:3,nama:"Meja Rapat",aset:"-",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 thn 5 bln",status:"Hilang"},
+  {nup:4,nama:"Meja Rapat",aset:"-",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 thn 5 bln",status:"Hilang"},
+  {nup:5,nama:"Meja Rapat",aset:"-",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 thn 5 bln",status:"Hilang"},
+  {nup:6,nama:"Meja Rapat",aset:"-",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 thn 5 bln",status:"Hilang"},
+  {nup:7,nama:"Meja Rapat",aset:"-",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 thn 5 bln",status:"Hilang"},
+  {nup:8,nama:"Meja Rapat",aset:"-",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 thn 5 bln",status:"Hilang"},
+  {nup:1,nama:"Meja Komputer",aset:"Grace 150",kondisi:"Rusak Berat",tanggal:"14/8/2007",umur:"18 thn 9 bln",status:"Hilang"},
+  {nup:2,nama:"Meja Komputer",aset:"Kayu Lokal",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 thn 5 bln",status:"Hilang"},
+  {nup:3,nama:"Meja Komputer",aset:"Kayu Lokal",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 thn 5 bln",status:"Hilang"},
+  {nup:4,nama:"Meja Komputer",aset:"ACTIV/WOSS CT",kondisi:"Rusak Berat",tanggal:"31/10/2013",umur:"12 thn 7 bln",status:"Hilang"},
+  {nup:5,nama:"Meja Komputer",aset:"ACTIV/WOSS CT",kondisi:"Rusak Berat",tanggal:"31/10/2013",umur:"12 thn 7 bln",status:"Hilang"},
+  {nup:1,nama:"Jam Elektronik",aset:"Quartz Time Star",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 thn 5 bln",status:"Hilang"},
+  {nup:2,nama:"Jam Elektronik",aset:"Quartz Time Star",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 thn 5 bln",status:"Hilang"},
+  {nup:1,nama:"Televisi",aset:"36 LED CHANGHONG",kondisi:"Rusak Berat",tanggal:"12/4/2018",umur:"8 thn 1 bln",status:"Hilang"},
+  {nup:1,nama:"Tape Recorder",aset:"SONY M-470",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:1,nama:"Loudspeaker",aset:"Empire 28000",kondisi:"Rusak Berat",tanggal:"29/7/2008",umur:"17 thn 10 bln",status:"Ada"},
+  {nup:1,nama:"Sound System",aset:"Dat",kondisi:"Rusak Berat",tanggal:"12/4/2018",umur:"8 thn 1 bln",status:"Ada"},
+  {nup:1,nama:"Wireless",aset:"Sanken",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 thn 5 bln",status:"Hilang"},
+  {nup:2,nama:"Wireless",aset:"Sanken",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 thn 5 bln",status:"Hilang"},
+  {nup:3,nama:"Wireless",aset:"LINKSYS E2500AP",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 thn 5 bln",status:"Ada"},
+  {nup:4,nama:"Wireless",aset:"LINKSYS E2500AP",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 thn 5 bln",status:"Hilang"},
+  {nup:1,nama:"Megaphone",aset:"TLA ZR-2015S",kondisi:"Rusak Berat",tanggal:"29/7/2008",umur:"17 thn 10 bln",status:"Ada"},
+  {nup:2,nama:"Megaphone",aset:"T O A",kondisi:"Rusak Berat",tanggal:"30/6/2008",umur:"17 thn 11 bln",status:"Hilang"},
+  {nup:1,nama:"Tangga Aluminium",aset:"Lipat",kondisi:"Rusak Berat",tanggal:"29/7/2008",umur:"17 thn 10 bln",status:"Hilang"},
+  {nup:2,nama:"Tangga Aluminium",aset:"Lipat",kondisi:"Rusak Berat",tanggal:"30/6/2008",umur:"17 thn 11 bln",status:"Hilang"},
+  {nup:1,nama:"Handy Cam",aset:"SONY DCR-DVD 810E",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Ada"},
+  {nup:2,nama:"Handy Cam",aset:"SONY CX220E",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 thn 5 bln",status:"Ada"},
+  {nup:3,nama:"Handy Cam",aset:"SONY Handycam HDR-PJ410",kondisi:"Rusak Berat",tanggal:"4/12/2017",umur:"8 thn 6 bln",status:"Hilang"},
+  {nup:1,nama:"Speaker Kabaret",aset:"SIMBADA Z-100",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:2,nama:"Speaker Kabaret",aset:"SIMBADA Z-100",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:3,nama:"Speaker Kabaret",aset:"SIMBADA Z-100",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:4,nama:"Speaker Kabaret",aset:"SIMBADA Z-100",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:5,nama:"Speaker Kabaret",aset:"SIMBADA Z-100",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:6,nama:"Speaker Kabaret",aset:"SIMBADA Z-100",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:7,nama:"Speaker Kabaret",aset:"SIMBADA Z-100",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:8,nama:"Speaker Kabaret",aset:"SIMBADA Z-100",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:1,nama:"UPS",aset:"-",kondisi:"Rusak Berat",tanggal:"31/12/2004",umur:"21 thn 5 bln",status:"Ada"},
+  {nup:2,nama:"UPS",aset:"-",kondisi:"Rusak Berat",tanggal:"31/12/2004",umur:"21 thn 5 bln",status:"Ada"},
+  {nup:3,nama:"UPS",aset:"-",kondisi:"Rusak Berat",tanggal:"31/12/2004",umur:"21 thn 5 bln",status:"Ada"},
+  {nup:1,nama:"Digital Audio Recorder",aset:"SONY ICD-UX523F",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 thn 5 bln",status:"Hilang"},
+  {nup:1,nama:"Camera Film",aset:"NIKON D-60",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Ada"},
+  {nup:1,nama:"Layar Film/Projector",aset:"Focus",kondisi:"Rusak Berat",tanggal:"29/7/2008",umur:"17 thn 10 bln",status:"Hilang"},
+  {nup:1,nama:"Camera Digital",aset:"Olympus FE-280",kondisi:"Rusak Berat",tanggal:"29/4/2008",umur:"18 thn 1 bln",status:"Ada"},
+  {nup:2,nama:"Camera Digital",aset:"Olympus",kondisi:"Rusak Berat",tanggal:"31/12/2008",umur:"17 thn 5 bln",status:"Hilang"},
+  {nup:3,nama:"Camera Digital",aset:"Olympus FE 280",kondisi:"Rusak Berat",tanggal:"10/4/2008",umur:"18 thn 1 bln",status:"Hilang"},
+  {nup:4,nama:"Camera Digital",aset:"OLYMPUS FE-300",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Ada"},
+  {nup:5,nama:"Camera Digital",aset:"BENQ GH600",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 thn 5 bln",status:"Ada"},
+  {nup:6,nama:"Camera Digital",aset:"Canon EOS 1300D",kondisi:"Rusak Berat",tanggal:"1/11/2017",umur:"8 thn 7 bln",status:"Hilang"},
+  {nup:1,nama:"Pesawat Telephone",aset:"Panaphone",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 thn 5 bln",status:"Ada"},
+  {nup:1,nama:"Telex",aset:"PANASONIC KX-FL 402 CX",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Ada"},
+  {nup:1,nama:"Scanner Facsimile",aset:"HP SCANJET 8300",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Ada"},
+  {nup:2,nama:"Scanner Facsimile",aset:"CANON FAX L170",kondisi:"Rusak Berat",tanggal:"31/10/2013",umur:"12 thn 7 bln",status:"Ada"},
+  ...Array.from({length:182},(_,i)=>({nup:i+1,nama:"Clinical Thermometer",aset:"-",kondisi:"Rusak Berat",tanggal:"1/7/2020",umur:"5 thn 11 bln",status:"Hilang"})),
+  ...Array.from({length:6},(_,i)=>({nup:i+1,nama:"UPS ICA CE-600",aset:"ICA CE-600",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Ada"})),
+  ...Array.from({length:4},(_,i)=>({nup:i+7,nama:"UPS ICA CE-600",aset:"ICA CE-600",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"})),
+  {nup:1,nama:"Komputer Jaringan",aset:"LINKSYS WRT54G",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:1,nama:"PC Unit",aset:"Pentium Dual Core",kondisi:"Rusak Berat",tanggal:"14/8/2007",umur:"18 thn 9 bln",status:"Hilang"},
+  {nup:2,nama:"PC Unit",aset:"Intel Core 2 Duo",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:4,nama:"PC Unit",aset:"Intel Core 2 Duo",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:5,nama:"PC Unit",aset:"Intel Core 2 Duo",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:6,nama:"PC Unit",aset:"Intel Core 2 Duo",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:7,nama:"PC Unit",aset:"Intel Core 2 Duo",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:8,nama:"PC Unit",aset:"Intel Core 2 Duo",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:9,nama:"PC Unit",aset:"Intel Core 2 Duo",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:10,nama:"PC Unit",aset:"HP",kondisi:"Rusak Berat",tanggal:"31/12/2004",umur:"21 thn 5 bln",status:"Hilang"},
+  {nup:11,nama:"PC Unit",aset:"HP",kondisi:"Rusak Berat",tanggal:"31/12/2004",umur:"21 thn 5 bln",status:"Hilang"},
+  {nup:12,nama:"PC Unit",aset:"HP",kondisi:"Rusak Berat",tanggal:"31/12/2004",umur:"21 thn 5 bln",status:"Hilang"},
+  {nup:13,nama:"PC Unit",aset:"ACER Aspire M3985",kondisi:"Rusak Berat",tanggal:"4/12/2012",umur:"13 thn 6 bln",status:"Hilang"},
+  {nup:14,nama:"PC Unit",aset:"Lenovo IdeaCenter H520",kondisi:"Rusak Berat",tanggal:"31/10/2013",umur:"12 thn 7 bln",status:"Ada"},
+  {nup:15,nama:"PC Unit",aset:"Lenovo IdeaCenter H520",kondisi:"Rusak Berat",tanggal:"31/10/2013",umur:"12 thn 7 bln",status:"Ada"},
+  {nup:16,nama:"PC Unit",aset:"Lenovo IdeaCenter H520",kondisi:"Rusak Berat",tanggal:"31/10/2013",umur:"12 thn 7 bln",status:"Hilang"},
+  {nup:17,nama:"PC Unit",aset:"Lenovo IdeaCenter H520",kondisi:"Rusak Berat",tanggal:"31/10/2013",umur:"12 thn 7 bln",status:"Hilang"},
+  {nup:18,nama:"PC Unit",aset:"Lenovo IdeaCenter H520",kondisi:"Rusak Berat",tanggal:"31/10/2013",umur:"12 thn 7 bln",status:"Hilang"},
+  {nup:19,nama:"PC Unit",aset:"ACER AMC605",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 thn 5 bln",status:"Ada"},
+  {nup:20,nama:"PC Unit",aset:"ACER AMC605",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 thn 5 bln",status:"Ada"},
+  {nup:21,nama:"PC Unit",aset:"PC AIO HP AMD",kondisi:"Rusak Berat",tanggal:"30/11/2017",umur:"8 thn 6 bln",status:"Hilang"},
+  {nup:22,nama:"PC Unit",aset:"Dell OptiPlex 5050",kondisi:"Rusak Berat",tanggal:"4/12/2017",umur:"8 thn 6 bln",status:"Ada"},
+  {nup:23,nama:"PC Unit",aset:"Dell OptiPlex 5050",kondisi:"Rusak Berat",tanggal:"4/12/2017",umur:"8 thn 6 bln",status:"Hilang"},
+  {nup:24,nama:"PC Unit",aset:"Dell OptiPlex 5050",kondisi:"Rusak Berat",tanggal:"3/7/2018",umur:"7 thn 11 bln",status:"Hilang"},
+  {nup:25,nama:"PC Unit",aset:"Lenovo AIO 520",kondisi:"Rusak Berat",tanggal:"11/12/2018",umur:"7 thn 5 bln",status:"Ada"},
+  {nup:26,nama:"PC Unit",aset:"Lenovo AIO 520",kondisi:"Rusak Berat",tanggal:"11/12/2018",umur:"7 thn 5 bln",status:"Ada"},
+  {nup:27,nama:"PC Unit",aset:"Lenovo AIO 520",kondisi:"Rusak Berat",tanggal:"11/12/2018",umur:"7 thn 5 bln",status:"Hilang"},
+  {nup:1,nama:"Laptop",aset:"Toshiba A135",kondisi:"Rusak Berat",tanggal:"14/8/2007",umur:"18 thn 9 bln",status:"Ada"},
+  {nup:2,nama:"Laptop",aset:"Toshiba U 205",kondisi:"Rusak Berat",tanggal:"29/4/2008",umur:"18 thn 1 bln",status:"Hilang"},
+  {nup:3,nama:"Laptop",aset:"Acer 4710z",kondisi:"Rusak Berat",tanggal:"29/4/2008",umur:"18 thn 1 bln",status:"Hilang"},
+  {nup:4,nama:"Laptop",aset:"Axioo",kondisi:"Rusak Berat",tanggal:"31/12/2007",umur:"18 thn 5 bln",status:"Hilang"},
+  {nup:6,nama:"Laptop",aset:"Toshiba U 205",kondisi:"Rusak Berat",tanggal:"10/4/2008",umur:"18 thn 1 bln",status:"Ada"},
+  {nup:7,nama:"Laptop",aset:"Acer 4710z",kondisi:"Rusak Berat",tanggal:"10/4/2008",umur:"18 thn 1 bln",status:"Ada"},
+  {nup:8,nama:"Laptop",aset:"ACER",kondisi:"Rusak Berat",tanggal:"23/4/2011",umur:"15 thn 1 bln",status:"Ada"},
+  {nup:9,nama:"Laptop",aset:"ASUS",kondisi:"Rusak Berat",tanggal:"27/12/2016",umur:"9 thn 5 bln",status:"Hilang"},
+  {nup:10,nama:"Laptop",aset:"Dell Inspiron 14 7447",kondisi:"Rusak Berat",tanggal:"4/12/2017",umur:"8 thn 6 bln",status:"Ada"},
+  {nup:11,nama:"Laptop",aset:"Dell Inspiron 14 7447",kondisi:"Rusak Berat",tanggal:"4/12/2017",umur:"8 thn 6 bln",status:"Hilang"},
+  {nup:12,nama:"Laptop",aset:"Dell Inspiron 14 7447",kondisi:"Rusak Berat",tanggal:"4/12/2017",umur:"8 thn 6 bln",status:"Hilang"},
+  {nup:13,nama:"Laptop",aset:"Asus FX504GD",kondisi:"Rusak Berat",tanggal:"11/12/2018",umur:"7 thn 5 bln",status:"Hilang"},
+  {nup:15,nama:"Laptop",aset:"ASUS X555QA",kondisi:"Rusak Berat",tanggal:"18/12/2018",umur:"7 thn 5 bln",status:"Ada"},
+  {nup:16,nama:"Laptop",aset:"DELL INSPIRON 15 3576",kondisi:"Rusak Berat",tanggal:"10/12/2018",umur:"7 thn 5 bln",status:"Hilang"},
+  {nup:17,nama:"Laptop",aset:"Asus Core i5",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 thn 5 bln",status:"Hilang"},
+  {nup:18,nama:"Laptop",aset:"Asus Core i5",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 thn 5 bln",status:"Hilang"},
+  {nup:20,nama:"Laptop",aset:"Asus Core i5",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 thn 5 bln",status:"Ada"},
+  {nup:1,nama:"Note Book",aset:"TOSHIBA SATELIT M-300",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Ada"},
+  {nup:2,nama:"Note Book",aset:"TOSHIBA SATELIT M-300",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Ada"},
+  {nup:3,nama:"Note Book",aset:"TOSHIBA SATELLITE L840",kondisi:"Rusak Berat",tanggal:"31/10/2013",umur:"12 thn 7 bln",status:"Ada"},
+  {nup:4,nama:"Note Book",aset:"ASUS X450CA",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 thn 5 bln",status:"Ada"},
+  {nup:5,nama:"Note Book",aset:"ASUS X450CA",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 thn 5 bln",status:"Ada"},
+  {nup:6,nama:"Note Book",aset:"Vostro 14 5468",kondisi:"Rusak Berat",tanggal:"20/11/2017",umur:"8 thn 6 bln",status:"Hilang"},
+  {nup:1,nama:"CPU",aset:"HP Compaq",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 thn 5 bln",status:"Hilang"},
+  {nup:2,nama:"CPU",aset:"LG",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 thn 5 bln",status:"Hilang"},
+  {nup:3,nama:"CPU",aset:"HP Compaq",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 thn 5 bln",status:"Hilang"},
+  {nup:4,nama:"CPU",aset:"HP Compaq",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 thn 5 bln",status:"Hilang"},
+  {nup:1,nama:"Monitor",aset:"HP 5500",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 thn 5 bln",status:"Hilang"},
+  {nup:2,nama:"Monitor",aset:"LG",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 thn 5 bln",status:"Ada"},
+  {nup:3,nama:"Monitor",aset:"HP 5500",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 thn 5 bln",status:"Ada"},
+  {nup:4,nama:"Monitor",aset:"HP 5500",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 thn 5 bln",status:"Hilang"},
+  {nup:1,nama:"Printer",aset:"Canon IP 700",kondisi:"Rusak Berat",tanggal:"14/8/2007",umur:"18 thn 9 bln",status:"Hilang"},
+  {nup:2,nama:"Printer",aset:"Canon IP 700",kondisi:"Rusak Berat",tanggal:"14/8/2007",umur:"18 thn 9 bln",status:"Hilang"},
+  {nup:3,nama:"Printer",aset:"Canon IP 188i",kondisi:"Rusak Berat",tanggal:"29/4/2008",umur:"18 thn 1 bln",status:"Ada"},
+  {nup:4,nama:"Printer",aset:"Canon IP 188i",kondisi:"Rusak Berat",tanggal:"29/4/2008",umur:"18 thn 1 bln",status:"Ada"},
+  {nup:5,nama:"Printer",aset:"Canon IP 188i",kondisi:"Rusak Berat",tanggal:"29/4/2008",umur:"18 thn 1 bln",status:"Ada"},
+  {nup:6,nama:"Printer",aset:"HP All In One F2180",kondisi:"Rusak Berat",tanggal:"29/4/2008",umur:"18 thn 1 bln",status:"Hilang"},
+  {nup:7,nama:"Printer",aset:"HP Laserjet 1020",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 thn 5 bln",status:"Hilang"},
+  {nup:8,nama:"Printer",aset:"Canon Pixma 1700",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 thn 5 bln",status:"Hilang"},
+  {nup:9,nama:"Printer",aset:"HP 5500",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 thn 5 bln",status:"Hilang"},
+  {nup:10,nama:"Printer",aset:"HP Laser Jet 3330",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 thn 5 bln",status:"Ada"},
+  {nup:11,nama:"Printer",aset:"Epson LQ 2180",kondisi:"Rusak Berat",tanggal:"31/12/2006",umur:"19 thn 5 bln",status:"Ada"},
+  {nup:13,nama:"Printer",aset:"Canon Ip1881",kondisi:"Rusak Berat",tanggal:"10/4/2008",umur:"18 thn 1 bln",status:"Hilang"},
+  {nup:14,nama:"Printer",aset:"Canon Ip1881",kondisi:"Rusak Berat",tanggal:"10/4/2008",umur:"18 thn 1 bln",status:"Hilang"},
+  {nup:15,nama:"Printer",aset:"Canon Ip1881",kondisi:"Rusak Berat",tanggal:"10/4/2008",umur:"18 thn 1 bln",status:"Hilang"},
+  {nup:16,nama:"Printer",aset:"LaserJet HP F2180",kondisi:"Rusak Berat",tanggal:"10/4/2008",umur:"18 thn 1 bln",status:"Hilang"},
+  {nup:17,nama:"Printer",aset:"CANON IP 4500",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Ada"},
+  {nup:18,nama:"Printer",aset:"CANON IP 4500",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Ada"},
+  {nup:19,nama:"Printer",aset:"HP 3330",kondisi:"Rusak Berat",tanggal:"31/12/2004",umur:"21 thn 5 bln",status:"Hilang"},
+  {nup:20,nama:"Printer",aset:"EPSON LQ 2180",kondisi:"Rusak Berat",tanggal:"31/12/2004",umur:"21 thn 5 bln",status:"Hilang"},
+  {nup:21,nama:"Printer",aset:"HP Laser Jet Pro M1132",kondisi:"Rusak Berat",tanggal:"4/12/2012",umur:"13 thn 6 bln",status:"Ada"},
+  {nup:22,nama:"Printer",aset:"CANON LBP7018C",kondisi:"Rusak Berat",tanggal:"31/10/2013",umur:"12 thn 7 bln",status:"Ada"},
+  {nup:23,nama:"Printer",aset:"CANON IP100",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 thn 5 bln",status:"Hilang"},
+  {nup:24,nama:"Printer",aset:"Canon PIXMA G2000",kondisi:"Rusak Berat",tanggal:"30/11/2017",umur:"8 thn 6 bln",status:"Hilang"},
+  {nup:25,nama:"Printer",aset:"Brother MFC",kondisi:"Rusak Berat",tanggal:"27/11/2018",umur:"7 thn 6 bln",status:"Ada"},
+  {nup:26,nama:"Printer",aset:"Brother MFC-L2700DW",kondisi:"Rusak Berat",tanggal:"11/12/2018",umur:"7 thn 5 bln",status:"Ada"},
+  {nup:28,nama:"Printer",aset:"EPSON Inkjet",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 thn 5 bln",status:"Ada"},
+  {nup:29,nama:"Printer",aset:"EPSON Inkjet",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 thn 5 bln",status:"Ada"},
+  {nup:31,nama:"Printer",aset:"EPSON Inkjet",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 thn 5 bln",status:"Hilang"},
+  {nup:33,nama:"Printer",aset:"EPSON Inkjet",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 thn 5 bln",status:"Hilang"},
+  {nup:34,nama:"Printer",aset:"EPSON Inkjet",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 thn 5 bln",status:"Hilang"},
+  {nup:35,nama:"Printer",aset:"EPSON Inkjet",kondisi:"Rusak Berat",tanggal:"17/12/2019",umur:"6 thn 5 bln",status:"Hilang"},
+  {nup:1,nama:"Scanner",aset:"EPSON V6000",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 thn 5 bln",status:"Ada"},
+  {nup:3,nama:"Scanner",aset:"Canon DR-M160II",kondisi:"Rusak Berat",tanggal:"4/12/2017",umur:"8 thn 6 bln",status:"Ada"},
+  {nup:4,nama:"Scanner",aset:"i2820",kondisi:"Rusak Berat",tanggal:"11/12/2018",umur:"7 thn 5 bln",status:"Ada"},
+  {nup:6,nama:"Scanner",aset:"i2820",kondisi:"Rusak Berat",tanggal:"11/12/2018",umur:"7 thn 5 bln",status:"Ada"},
+  {nup:7,nama:"Scanner",aset:"i2820",kondisi:"Rusak Berat",tanggal:"11/12/2018",umur:"7 thn 5 bln",status:"Hilang"},
+  {nup:8,nama:"Scanner",aset:"BROTHER ADS 1100 W",kondisi:"Rusak Berat",tanggal:"18/12/2018",umur:"7 thn 5 bln",status:"Hilang"},
+  {nup:1,nama:"External Hardisk",aset:"WD MY Passport 2TB",kondisi:"Rusak Berat",tanggal:"30/11/2017",umur:"8 thn 6 bln",status:"Hilang"},
+  {nup:2,nama:"External Hardisk",aset:"SEAGATE 2TB",kondisi:"Rusak Berat",tanggal:"4/12/2017",umur:"8 thn 6 bln",status:"Hilang"},
+  {nup:1,nama:"Hub",aset:"SMC 8 PORT",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Ada"},
+  {nup:2,nama:"Hub",aset:"SMC 8 PORT",kondisi:"Rusak Berat",tanggal:"23/6/2011",umur:"14 thn 11 bln",status:"Hilang"},
+  {nup:3,nama:"Hub",aset:"-",kondisi:"Rusak Berat",tanggal:"30/12/2004",umur:"21 thn 5 bln",status:"Hilang"},
+  {nup:4,nama:"Hub",aset:"TP LINK TL3424",kondisi:"Rusak Berat",tanggal:"24/12/2013",umur:"12 thn 5 bln",status:"Hilang"},
+  {nup:1,nama:"Switch",aset:"TRENDNET 48-Port",kondisi:"Rusak Berat",tanggal:"4/12/2017",umur:"8 thn 6 bln",status:"Ada"},
 ];
 
-// ===== STATE =====
-let activeFilter = 'all';
-let sortKey = null;
-let sortDir = 1;
-let currentPage = 1;
-const PAGE_SIZE = 15;
+// STATE
+let activeFilter='all',sortKey=null,sortDir=1,currentPage=1;
+const PAGE_SIZE=15;
 
-function getFiltered() {
-  const q = document.getElementById('searchBox').value.toLowerCase();
-  return rawData.filter(d => {
-    const matchFilter = activeFilter === 'all' || d.status === activeFilter;
-    const matchSearch = !q || d.nama.toLowerCase().includes(q) || d.aset.toLowerCase().includes(q);
-    return matchFilter && matchSearch;
-  });
+function getFiltered(){
+  const q=document.getElementById('searchBox').value.toLowerCase();
+  return rawData.filter(d=>(activeFilter==='all'||d.status===activeFilter)&&(!q||d.nama.toLowerCase().includes(q)||d.aset.toLowerCase().includes(q)));
 }
-
-function setFilter(val, btn) {
-  activeFilter = val;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+function setFilter(val,btn){
+  activeFilter=val;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  currentPage = 1;
-  updateKPI();
-  renderTable();
-  updateCharts();
+  currentPage=1;updateKPI();renderTable();updateCharts();
 }
-
-// ===== KPI =====
-function updateKPI() {
-  const data = getFiltered();
-  const total = rawData.length;
-  const hilang = rawData.filter(d=>d.status==='Hilang').length;
-  const ada = rawData.filter(d=>d.status==='Ada').length;
-  const cats = new Set(rawData.map(d=>d.nama)).size;
-  document.getElementById('kpi-total').textContent = total;
-  document.getElementById('kpi-hilang').textContent = hilang;
-  document.getElementById('kpi-hilang-pct').textContent = ((hilang/total)*100).toFixed(1)+'% dari total';
-  document.getElementById('kpi-ada').textContent = ada;
-  document.getElementById('kpi-ada-pct').textContent = ((ada/total)*100).toFixed(1)+'% dari total';
-  document.getElementById('kpi-kat').textContent = cats;
+function updateKPI(){
+  const t=rawData.length,h=rawData.filter(d=>d.status==='Hilang').length,a=rawData.filter(d=>d.status==='Ada').length;
+  document.getElementById('kpi-total').textContent=t;
+  document.getElementById('kpi-hilang').textContent=h;
+  document.getElementById('kpi-hp').textContent=((h/t)*100).toFixed(1)+'% dari total';
+  document.getElementById('kpi-ada').textContent=a;
+  document.getElementById('kpi-ap').textContent=((a/t)*100).toFixed(1)+'% dari total';
+  document.getElementById('kpi-kat').textContent=new Set(rawData.map(d=>d.nama)).size;
 }
-
-// ===== TABLE =====
-function sortTable(key) {
-  if(sortKey===key) sortDir *= -1;
-  else { sortKey=key; sortDir=1; }
-  renderTable();
+function sortTable(key){if(sortKey===key)sortDir*=-1;else{sortKey=key;sortDir=1;}renderTable();}
+function renderTable(){
+  let data=getFiltered();
+  if(sortKey) data=[...data].sort((a,b)=>{let va=a[sortKey]??'',vb=b[sortKey]??'';return typeof va==='number'?(va-vb)*sortDir:va.toString().localeCompare(vb.toString())*sortDir;});
+  const total=data.length,pages=Math.ceil(total/PAGE_SIZE)||1;
+  if(currentPage>pages)currentPage=pages;
+  const slice=data.slice((currentPage-1)*PAGE_SIZE,currentPage*PAGE_SIZE);
+  document.getElementById('tableBody').innerHTML=slice.map((d,i)=>`<tr>
+    <td style="color:var(--muted);font-family:'DM Mono',monospace;font-size:11px">${(currentPage-1)*PAGE_SIZE+i+1}</td>
+    <td style="font-family:'DM Mono',monospace">${d.nup}</td>
+    <td title="${d.nama}">${d.nama}</td>
+    <td title="${d.aset}">${d.aset||'-'}</td>
+    <td style="font-family:'DM Mono',monospace;font-size:12px">${d.tanggal}</td>
+    <td style="font-size:12px;color:var(--muted)">${d.umur}</td>
+    <td><span style="color:var(--warning);font-size:12px">${d.kondisi}</span></td>
+    <td><span class="badge ${d.status.toLowerCase()}">${d.status}</span></td>
+  </tr>`).join('');
+  document.getElementById('tableInfo').textContent=`Menampilkan ${slice.length} dari ${total} data`;
+  document.getElementById('pageInfo').textContent=`${currentPage} / ${pages}`;
+  document.getElementById('btnPrev').disabled=currentPage<=1;
+  document.getElementById('btnNext').disabled=currentPage>=pages;
 }
+function changePage(dir){currentPage+=dir;renderTable();}
 
-function renderTable() {
-  let data = getFiltered();
-  if(sortKey) {
-    data = [...data].sort((a,b) => {
-      let va=a[sortKey]??'', vb=b[sortKey]??'';
-      if(typeof va==='number') return (va-vb)*sortDir;
-      return va.toString().localeCompare(vb.toString())*sortDir;
-    });
-  }
-  const total = data.length;
-  const pages = Math.ceil(total/PAGE_SIZE) || 1;
-  if(currentPage>pages) currentPage=pages;
-  const slice = data.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
-  const tbody = document.getElementById('tableBody');
-  tbody.innerHTML = slice.map((d,i)=>`
-    <tr>
-      <td style="color:var(--muted);font-family:'DM Mono',monospace;font-size:11px">${(currentPage-1)*PAGE_SIZE+i+1}</td>
-      <td style="font-family:'DM Mono',monospace">${d.nup}</td>
-      <td title="${d.nama}">${d.nama}</td>
-      <td title="${d.aset}">${d.aset||'-'}</td>
-      <td style="font-family:'DM Mono',monospace;font-size:12px">${d.tanggal}</td>
-      <td style="font-size:12px;color:var(--muted)">${d.umur}</td>
-      <td><span style="color:var(--warning);font-size:12px">${d.kondisi}</span></td>
-      <td><span class="badge ${d.status.toLowerCase()}">${d.status}</span></td>
-    </tr>
-  `).join('');
-  document.getElementById('tableInfo').textContent = `Menampilkan ${slice.length} dari ${total} data`;
-  document.getElementById('pageInfo').textContent = `${currentPage} / ${pages}`;
-  document.getElementById('btnPrev').disabled = currentPage<=1;
-  document.getElementById('btnNext').disabled = currentPage>=pages;
+// CHARTS
+let barChart,donutChart,lineChart,hbarChart;
+function tc(){return isDark?'#64748b':'#94a3b8';}
+function gc(){return isDark?'rgba(30,45,69,0.5)':'rgba(203,213,225,0.7)';}
+function catStats(){
+  const m={};rawData.forEach(d=>{if(!m[d.nama])m[d.nama]={ada:0,hilang:0};if(d.status==='Ada')m[d.nama].ada++;else m[d.nama].hilang++;});
+  return Object.entries(m).map(([k,v])=>({nama:k,...v,total:v.ada+v.hilang})).sort((a,b)=>b.total-a.total);
 }
-
-function changePage(dir) {
-  currentPage += dir;
-  renderTable();
+function yearStats(){
+  const m={};rawData.forEach(d=>{const p=d.tanggal.split('/');let yr=parseInt(p[2]);if(yr<100)yr+=2000;if(yr>1990&&yr<2030){if(!m[yr])m[yr]={ada:0,hilang:0};if(d.status==='Ada')m[yr].ada++;else m[yr].hilang++;}});
+  return Object.entries(m).sort((a,b)=>a[0]-b[0]);
 }
-
-// ===== CHARTS =====
-let barChart, donutChart, lineChart, hbarChart;
-
-function buildCategoryStats() {
-  const map = {};
-  rawData.forEach(d => {
-    if(!map[d.nama]) map[d.nama] = {ada:0,hilang:0};
-    if(d.status==='Ada') map[d.nama].ada++;
-    else map[d.nama].hilang++;
-  });
-  return Object.entries(map).map(([k,v])=>({nama:k,...v,total:v.ada+v.hilang}))
-    .sort((a,b)=>b.total-a.total);
+function updateCharts(){
+  const t=tc(),g=gc(),cats=catStats().slice(0,12);
+  const lbs=cats.map(c=>c.nama.length>18?c.nama.substring(0,16)+'…':c.nama);
+  if(barChart)barChart.destroy();
+  barChart=new Chart(document.getElementById('barChart'),{type:'bar',data:{labels:lbs,datasets:[{label:'Ada',data:cats.map(c=>c.ada),backgroundColor:'rgba(16,185,129,0.75)',borderRadius:4},{label:'Hilang',data:cats.map(c=>c.hilang),backgroundColor:'rgba(239,68,68,0.75)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:t,font:{size:11}}},tooltip:{mode:'index'}},scales:{x:{ticks:{color:t,font:{size:10}},grid:{color:g}},y:{ticks:{color:t,font:{size:10}},grid:{color:g}}}}});
+  const tH=rawData.filter(d=>d.status==='Hilang').length,tA=rawData.filter(d=>d.status==='Ada').length;
+  if(donutChart)donutChart.destroy();
+  donutChart=new Chart(document.getElementById('donutChart'),{type:'doughnut',data:{labels:['Ada','Hilang'],datasets:[{data:[tA,tH],backgroundColor:['rgba(16,185,129,0.85)','rgba(239,68,68,0.85)'],borderWidth:0,hoverOffset:6}]},options:{responsive:false,cutout:'70%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw} (${((ctx.raw/(tA+tH))*100).toFixed(1)}%)`}}}}});
+  document.getElementById('donutChart').width=180;document.getElementById('donutChart').height=180;
+  document.getElementById('donut-legend').innerHTML=`<div class="legend-item"><div class="legend-dot" style="background:rgba(16,185,129,0.85)"></div>Ada: ${tA}</div><div class="legend-item"><div class="legend-dot" style="background:rgba(239,68,68,0.85)"></div>Hilang: ${tH}</div>`;
+  const yd=yearStats();
+  if(lineChart)lineChart.destroy();
+  lineChart=new Chart(document.getElementById('lineChart'),{type:'bar',data:{labels:yd.map(d=>d[0]),datasets:[{label:'Ada',data:yd.map(d=>d[1].ada),backgroundColor:'rgba(16,185,129,0.65)',borderRadius:3},{label:'Hilang',data:yd.map(d=>d[1].hilang),backgroundColor:'rgba(239,68,68,0.65)',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:t,font:{size:11}}}},scales:{x:{ticks:{color:t,font:{size:10}},grid:{color:g},stacked:true},y:{ticks:{color:t,font:{size:10}},grid:{color:g},stacked:true}}}});
+  const topH=catStats().sort((a,b)=>b.hilang-a.hilang).slice(0,8);
+  if(hbarChart)hbarChart.destroy();
+  hbarChart=new Chart(document.getElementById('hbarChart'),{type:'bar',data:{labels:topH.map(c=>c.nama.length>20?c.nama.substring(0,18)+'…':c.nama),datasets:[{label:'Hilang',data:topH.map(c=>c.hilang),backgroundColor:'rgba(239,68,68,0.75)',borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:t,font:{size:10}},grid:{color:g}},y:{ticks:{color:t,font:{size:10}},grid:{display:false}}}}});
 }
-
-function buildYearStats() {
-  const map = {};
-  rawData.forEach(d => {
-    const parts = d.tanggal.split('/');
-    let yr;
-    if(parts.length===3) {
-      yr = parts[2].length===4 ? parseInt(parts[2]) : parseInt(parts[2]);
-      if(yr<100) yr += 2000;
-    }
-    if(yr && yr>1990 && yr<2030) {
-      if(!map[yr]) map[yr]={ada:0,hilang:0};
-      if(d.status==='Ada') map[yr].ada++;
-      else map[yr].hilang++;
-    }
-  });
-  return Object.entries(map).sort((a,b)=>a[0]-b[0]);
-}
-
-function updateCharts() {
-  const cats = buildCategoryStats().slice(0,12);
-  const labels = cats.map(c => c.nama.length>18 ? c.nama.substring(0,16)+'…' : c.nama);
-
-  // BAR CHART
-  if(barChart) barChart.destroy();
-  barChart = new Chart(document.getElementById('barChart'), {
-    type:'bar',
-    data:{
-      labels,
-      datasets:[
-        {label:'Ada',data:cats.map(c=>c.ada),backgroundColor:'rgba(16,185,129,0.75)',borderRadius:4},
-        {label:'Hilang',data:cats.map(c=>c.hilang),backgroundColor:'rgba(239,68,68,0.75)',borderRadius:4}
-      ]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{mode:'index'}},
-      scales:{
-        x:{ticks:{color:'#64748b',font:{size:10}},grid:{color:'rgba(30,45,69,0.4)'}},
-        y:{ticks:{color:'#64748b',font:{size:10}},grid:{color:'rgba(30,45,69,0.4)'}}
-      }
-    }
-  });
-
-  // DONUT
-  const totalHilang = rawData.filter(d=>d.status==='Hilang').length;
-  const totalAda = rawData.filter(d=>d.status==='Ada').length;
-  if(donutChart) donutChart.destroy();
-  donutChart = new Chart(document.getElementById('donutChart'), {
-    type:'doughnut',
-    data:{
-      labels:['Ada','Hilang'],
-      datasets:[{data:[totalAda,totalHilang],backgroundColor:['rgba(16,185,129,0.8)','rgba(239,68,68,0.8)'],borderWidth:0,hoverOffset:6}]
-    },
-    options:{
-      responsive:false,
-      cutout:'70%',
-      plugins:{
-        legend:{display:false},
-        tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw} (${((ctx.raw/(totalAda+totalHilang))*100).toFixed(1)}%)`}}
-      }
-    }
-  });
-  document.getElementById('donut-legend').innerHTML = `
-    <div class="legend-item"><div class="legend-dot" style="background:rgba(16,185,129,0.8)"></div>Ada: ${totalAda}</div>
-    <div class="legend-item"><div class="legend-dot" style="background:rgba(239,68,68,0.8)"></div>Hilang: ${totalHilang}</div>
-  `;
-  document.getElementById('donutChart').width = 180;
-  document.getElementById('donutChart').height = 180;
-
-  // LINE CHART
-  const yearData = buildYearStats();
-  if(lineChart) lineChart.destroy();
-  lineChart = new Chart(document.getElementById('lineChart'), {
-    type:'bar',
-    data:{
-      labels: yearData.map(d=>d[0]),
-      datasets:[
-        {label:'Ada',data:yearData.map(d=>d[1].ada),backgroundColor:'rgba(16,185,129,0.6)',borderRadius:3},
-        {label:'Hilang',data:yearData.map(d=>d[1].hilang),backgroundColor:'rgba(239,68,68,0.6)',borderRadius:3}
-      ]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{labels:{color:'#64748b',font:{size:11}}}},
-      scales:{
-        x:{ticks:{color:'#64748b',font:{size:10}},grid:{color:'rgba(30,45,69,0.4)'},stacked:true},
-        y:{ticks:{color:'#64748b',font:{size:10}},grid:{color:'rgba(30,45,69,0.4)'},stacked:true}
-      }
-    }
-  });
-
-  // HORIZONTAL BAR - Top hilang
-  const topHilang = buildCategoryStats()
-    .sort((a,b)=>b.hilang-a.hilang)
-    .slice(0,8);
-  if(hbarChart) hbarChart.destroy();
-  hbarChart = new Chart(document.getElementById('hbarChart'), {
-    type:'bar',
-    data:{
-      labels: topHilang.map(c=>c.nama.length>20?c.nama.substring(0,18)+'…':c.nama),
-      datasets:[{label:'Hilang',data:topHilang.map(c=>c.hilang),backgroundColor:'rgba(239,68,68,0.75)',borderRadius:4}]
-    },
-    options:{
-      indexAxis:'y',
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false}},
-      scales:{
-        x:{ticks:{color:'#64748b',font:{size:10}},grid:{color:'rgba(30,45,69,0.4)'}},
-        y:{ticks:{color:'#64748b',font:{size:10}},grid:{display:false}}
-      }
-    }
-  });
-}
-
-// ===== INIT =====
-updateKPI();
-renderTable();
-updateCharts();
 </script>
 </body>
 </html>
